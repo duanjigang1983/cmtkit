@@ -48,7 +48,32 @@ and now, the working directory is "....Ice-3.3.1/cpp"
 
 
 Compiling cmtk and cmtkd.
-	
+	To get the source code, run command:
+	git clone git://github.com/duanjigang1983/cmtkit.git
+then you will get the source dir of cmtkit, which consists of 
+
+		README 		a file
+		cmtkitd 	a shell script file to install the cmtkd as a service
+		cmtk		a directory where the code of cmtk exists
+		cmtkctl		a directory where code of cmctk is stored
+		cmtkd		a directory for source code of cmtkd
+compile cmctl:
+	cd cmctl
+	make
+then you will get the command cmctl to control cmtk and cmtkd.
+
+compile cmtk
+	cd cmtk
+	make
+	then you get command cmtk to run command
+compile cmtkd
+	cd cmtkd
+	make 
+	then you get command cmtkd which will run on all server just like the sshd
+
+If there are any errors in your compiling, just check the Makefile and your installing position of Ice and MCPP.
+
+	sofar, all compiling of cmtkid is OK
 
 2) MAKE RPMS
 
