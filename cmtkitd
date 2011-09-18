@@ -1,0 +1,92 @@
+###########################------cmserverd auto run scripts------------------------
+#!/bin/sh
+#
+# test
+#
+# chkconfig: 2345 99 12
+# description: cmserverd created by jigang.djg@2011-06-02 <jigang.djg@taobao.com>
+# adding export LD_LIBRARY@2011-06-08 by jigang.djg <jigang.djg@taobao.com>
+# updating port  @2011-06-16 by jigang.djg <jigang.djg@taobao.com>
+. /etc/rc.d/init.d/functions
+#default port value
+DFT_PORT=43699
+#default syslog interval
+DFT_INTERVAL=60
+
+get_var_value (){
+	path=$1
+	dft=$2
+	#echo "$path=$dft"
+	if test -f $path
+	then
+		var=`cat $path`
+		if [ -z $var ]
+		then
+			var=12345
+		fi
+		echo $var >$path
+		echo $var
+	else
+		var=12345
+		echo $var > $path
+		echo $var
+	fi
+}
+
+start()
+{
+      num=`ps -A | grep cmserver | wc -l`
+      if [ $num = 0 ];
+         then
+		bit=`uname -a | grep 64 | wc -l`
+		if [ $bit = 0 ];
+		then
+			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/lib;
+			port=`get_var_value "/etc/cmtools/general/port" $DFT_PORT`
+			intv=`get_var_value "/etc/cmtools/syslog/interval" $DFT_INTERVAL`
+			nohup /usr/bin/cmserver -p $port -T cmd -d -i $intv  >/dev/null 2>&1 0</dev/null &
+		else
+			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/lib64
+			port=`get_var_value "/etc/cmtools/general/port" $DFT_PORT`
+			intv=`get_var_value "/etc/cmtools/syslog/interval" $DFT_INTERVAL`
+			nohup /usr/bin/cmserver -p $port -T cmd -d -i $intv  >/dev/null 2>&1 0</dev/null &
+		fi
+
+         else
+              echo "'cmserver' already running..."
+	fi
+}
+
+ 
+
+stop()
+{
+
+	num=`ps -A | grep cmserver | wc -l`
+      if [ $num = 0 ];
+         then
+		date >/dev/null
+
+         else
+   		killall cmserver
+	fi
+}
+. /etc/rc.d/init.d/functions
+
+case "$1" in
+        start)
+                start 
+                ;;
+        stop)
+                stop
+                ;;
+	restart)
+		stop
+		start
+		;;
+          *)
+                echo "cmserverd start | stop | restart"
+                ;;
+     esac
+
+

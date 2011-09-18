@@ -1,0 +1,23 @@
+#CFLAG=-c -Wall  -I/usr/local/include  -ftemplate-depth-128 -I./ -D__LINUX__ -g
+CFLAG=-c -Wall -I./ -D__LINUX__ -g
+SERVER_OBJS=MessageHandler.o cmdhelper.o cmutils.o syslog_utils.o IniHelper.o NetHelper.o cm_utils.o host_tree.o
+CLI_OBJS=cmdhelper.o utils.o NetHelper.o syslog_utils.o  cm_utils.o
+DFLAG=-lIce -lIceUtil -lpthread
+CC=c++
+default:
+	$(CC) $(CFLAG)   cmtkd.cpp
+	$(CC) $(CFLAG)   cmutils.cpp
+	$(CC) $(CFLAG)   host_tree.cpp
+	$(CC) $(CFLAG)   MessageHandler.cpp
+	$(CC) $(CFLAG)   cmdhelper.cpp
+	$(CC) $(CFLAG)   syslog_utils.cpp
+	$(CC) $(CFLAG)   NetHelper.cpp
+	$(CC) $(CFLAG)   IniHelper.cpp
+	$(CC) $(CFLAG)   cm_utils.cpp
+	$(CC) -o cmtkd  cmtkd.o $(SERVER_OBJS) $(DFLAG)    
+clean:
+	rm *.o cmtkd
+
+install:
+	install -v cmtkd     /usr/local/bin/cmtkd
+	install -v cmtkd_config.init /etc/cmtk/
