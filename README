@@ -1,0 +1,60 @@
+created by duanjigang1983<duanjigang1983@gmail.com> for cmtk at 2011-09-19
+
+cmtk/cmtkd is a system tool used to access many hosts parallelly, with cmtk/cmtkd, you may
+run a command on a host or transfer a file to a host. moreover, cmtk/cmtkd will help you to access
+thousands of hosts quickly with the help of multi-threaded programming.
+
+============================================================================================
+what is shown in this file?
+
+1) how to compile the source of cmtk and cmtkd
+2) make rpms of cmtk and cmtkd so that you may install them on another computer
+3) configure cmtk/cmtkd
+4) do your job with the help of cmtk/cmtkd
+
+==================================================================
+
+1) COMPILE THE SOURCE CODE
+	
+ Cmtk communicates with cmtkd based on the ICE (Internet Communications Engine, www.zeroc.com) but not the standard tcp socket. we want the communication to be simple and strong, and more developers with diffrent computer languages on diffrent platform may join in the cmtk, so ICE was selected but not the standard tcp socket.
+	
+   To compile the source code of cmtk/cmtkd,  ICE develop components is needed to install.
+	firstly, download Ice-3.3.1.tar.gz and mcpp-2.7.2.tar.gz, or you may download it from my git:
+	
+		git clone git://github.com/duanjigang1983/ice-libs.git
+	after getting the Ice tar and mcpp tar. try to install them.
+Install mcpp
+
+	tar -zxvf mcpp-2.7.2.tar.gz
+	cd mcpp-2.7.2
+	./configure CFLAGS=-fPIC -enable-mcpplib -enable-shared
+	make 
+	make install
+	ldconfig
+Install Ice
+	tar -zxvf Ice-3.3.1.tar.gz
+	cd Ice-3.3.1/
+	cd cpp
+	
+then change the content of 'prefix' in file "config/Make.rules",default value is:
+	prefix                   ?= /opt/Ice-$(VERSION)
+we change it to
+	prefix                   ?= /usr/local/Ice-$(VERSION)
+and now, the working directory is "....Ice-3.3.1/cpp"
+	just enter the make and make install command
+		make
+		make install
+	then, mcpp and ice is successfully installed.
+
+
+Compiling cmtk and cmtkd.
+	
+
+2) MAKE RPMS
+
+
+3)CONFIGURE CMTK AND CMTKD
+
+
+4)USING IT IN YOUR JOB
+test
