@@ -124,7 +124,7 @@ information of the spec file and rpmbuild command ,just ask help from google or 
 	more over, cmtkctl need to be generated:
 	cd cmtkctl/
 	make
-	cmtkctl is used to managed the autorized file of cmtk/cmtkd.
+	cmtkctl is used to manage the autorized file of cmtk/cmtkd.
 
 
 3)CONFIGURE CMTK AND CMTKD
