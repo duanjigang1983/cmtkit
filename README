@@ -82,8 +82,49 @@ compile cmtkd
 If there are any errors in your compiling, just check the Makefile and your installing position of Ice and MCPP.
 
 	sofar, all compiling of cmtkid is OK
+===========================================================================
 
 2) MAKE RPMS
+ 
+Cmtkit is a system managment tool, so you may install it on thounds of computers, then, install cmtkit from the source code is not a clever way. then rpm installing is an efficient way for your installing job.
+ In the source directory of cmtk and cmtkd, there is each a .spec for the rpm building job. if you are not familiar with
+the rpm command and spec file, just do what as i tell u. either, you are expert at spec file and rpmbuild, change these
+spec files as you want, or you may write your own spec files to get the rpms as your will.
+
+In next steps, how to do is told  in this document but not all the reasons for what you do. if you want to get detailed 
+information of the spec file and rpmbuild command ,just ask help from google or man book.
+
+	MAKING RPM FOR CMTK
+			; change dire
+			cd cmtkit/cmtk
+			;copy spec files
+			cp cmtk.spec /usr/src/redhat/SPECS/
+			;make the source tar 
+			tar -czf cmtk.tar.gz *
+			;move source tar to dest dir
+			mv cmtk.tar.gz  /usr/src/redhat/SOURCES/
+			;change dir to SPE and try to build your rpms
+			cd /usr/src/redhat/SPECS/
+			rpmbuild -bb cmtk.spec (you must do it as root or sudo)
+	if no error is print out, the rpm is built out successfully.
+	when you are woking on a box of bit64, try to run command :
+				ls ../RPMS/x86_64/
+	or when you are on a box of bit32,try command :
+				ls ../RPMS/i386
+	then, you will get the rpm files, for example:
+			cmtk-1.0.1-1.el5.x86_64.rpm
+	For cmtkd:
+		cp cmtkd.spec /usr/src/redhat/SPECS/
+		tar -czf cmtkd.tar.gz *
+		mv cmtkd.tar.gz /usr/src/redhat/SOURCES/
+		cd /usr/src/redhat/SPECS/
+		rpmbuild -bb cmtkd.spec
+	then we get: cmtkd-1.0.1-1.el5.x86_64.rpm
+		
+	more over, cmtkctl need to be generated:
+	cd cmtkctl/
+	make
+	cmtkctl is used to managed the autorized file of cmtk/cmtkd.
 
 
 3)CONFIGURE CMTK AND CMTKD
