@@ -9,8 +9,9 @@ what is shown in this file?
 
 1) how to compile the source of cmtk and cmtkd
 2) make rpms of cmtk and cmtkd so that you may install them on another computer
-3) configure cmtk/cmtkd
-4) do your job with the help of cmtk/cmtkd
+3) configure cmtk/cmtkd and do simple jobs with it
+4) do your job on thounds of computers.
+5) moreover
 
 ==================================================================
 
@@ -125,10 +126,149 @@ information of the spec file and rpmbuild command ,just ask help from google or 
 	cd cmtkctl/
 	make
 	cmtkctl is used to manage the autorized file of cmtk/cmtkd.
+let's have a look at what consists cmtk and cmtkd
+
+	rpm -qpl cmtk-1.0.1-1.el5.x86_64.rpm 
+/etc/cmtk/cmtk_config.ini
+/usr/bin/cmtk
+/usr/local/Ice-3.3.1/lib64/libIce.so.3.3.1
+/usr/local/Ice-3.3.1/lib64/libIceUtil.so.3.3.1
+	rpm -qpl cmtkd-1.0.1-1.el5.x86_64.rpm 
+/etc/cmtk/cmtkd_config.ini
+/etc/init.d/cmtkitd
+/usr/bin/cmtkd
+/usr/local/Ice-3.3.1/lib64/libIce.so.3.3.1
+/usr/local/Ice-3.3.1/lib64/libIceUtil.so.3.3.1
+
+3)CONFIGURE CMTK/CMTKD AND RUN IT.
+
+before run the cmtk commamnd, install cmtk and cmtkd:
+
+	rpm -ivh cmtk-1.0.1-1.el5.x86_64.rpm
+	rpm -ivh cmtkd-1.0.1-1.el5.x86_64.rpm
+type to view the service we installed:
+	chkconfig --list |grep cmtk
+cmtkitd        	0:off	1:off	2:on	3:on	4:on	5:on	6:off
+
+after gettint the name of our service, just start it
+	ervice cmtkitd start	
+check wether the task is running successfully
+	ps -A | grep cmtkd
+	32117 ?        00:00:00 cmtkd
+	now we are sure that the cmtkd is running. why not try to do something with cmtk?
+	yes, we do so much boring work just to use the cmtk/cmtkd tool.
+try  to "cmtk" and what you will get is:
+	usage:cmtk
+	[-p remote port		]
+	[-h remote host		]
+	[-f configfile		]
+	[-c command		]
+	[-n task number		]
+	[-u file to update	]
+	[-d dest_file		]
+	[-s run command silent	]
+	[-t time out		]
+	[-a auth		]
+as we can know from above messages, that you'd better enter a host name or ip which the cmtk will notify
+to do you job, also, you must tell cmtk what you want to do. run a command on the specified host or transfer a file
+to the remote host? so ,"-h host " must be supplied to the cmtk command, and either "-c command" or "-u file" must 
+be entered to cmtk, so that the cmtk will be clear what he will service for you.
+
+	firstly, we just try a command to get the host ip
+	
+	cmtk -h 127.0.0.1 -c "ifconfig eth0"	
+	
+	what you will get from cmtk? if you are running cmtk for the first time, mostly you will get the result 
+	like below:
+		(127.0.0.1):[127.0.0.1]
+		you are  not authorized to run command on this host
+	it means that you are not allowed to run command on this host as the identity of you current user name.
+	
+	to got yourself be authorized, cmtkctl is needed.
+		just run command:
+		./cmtkctl add root@127.0.0.1 /etc/cmserver.lst
+		./cmtkctl add duanjigang1983@10.32.102.48 /etc/cmserver.lst
+	the first line tell the cmtkd running on localhost that any command or file transfer from local host by user root 	will be accept.
+		the second line tell cmtkd running on localhost that any command or file send from 10.32.102.48 by user "duanjigang1983" will be accept, when the command or file transfer to the box that cmtkd running is not delivered by user "duanjigang1983" or is not sent from a host which has an ip address equal to "10.32.102.48", the command or file will
+be reject.
+	
+	after adding or del some authorizing information, cmtkd will works after it is restart.
+	./cmtkctl add duanjigang1983@10.32.102.48 /etc/cmserver.lst
+	./cmtkctl add test@10.32.102.48 /etc/cmserver.lst
+
+	then copy file cmserver.lst to directory /etc on all host you want to managed from 10.32.102.48
+	lastly, restart cmtkd on all computers we will control with cmtk.
+	
+		service cmtkitd restart
+	then, you may run cmtk freely.
+===================================================
+
+try  a command  to get ip address of eth0 of localhost
+
+	cmtk -h 127.0.0.1 -c "ifconfig eth0"
+(127.0.0.1):[127.0.0.1]
+eth0      Link encap:Ethernet  HWaddr 08:00:27:8A:B3:7A  
+          inet addr:10.32.102.48  Bcast:10.32.102.63  Mask:255.255.255.192
+          inet6 addr: fe80::a00:27ff:fe8a:b37a/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:1422549 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:630301 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:349752656 (333.5 MiB)  TX bytes:150724157 (143.7 MiB)
+          Base address:0xd060 Memory:f0820000-f0840000 
+============================================================
+try to get disk information of 10.32.102.48
+	cmtk -h 10.32.102.48 -c "df -h"
+(10.32.102.48):[10.32.102.48]
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00
+                       38G  4.2G   32G  12% /
+/dev/hda1              99M   19M   75M  20% /boot
+tmpfs                 250M     0  250M   0% /dev/shm
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+try to upload to host 10.32.102.48
+date > /tmp/test.ini
+
+just upload it 
+	cmtk -h 10.32.102.48 -u /tmp/test.ini -d /tmp/2.txt
+	upload file [/tmp/test.ini] to destination [/tmp/2.txt]:
+(10.32.102.48):[10.32.102.48]
+success
+-------------------
+then view the content of /tmp/2.txt on 10.32.102.48
+	cmtk -h 10.32.102.48 -c "cat /tmp/2.txt"
+
+	(10.32.102.48):[10.32.102.48]
+Fri Sep 23 15:21:24 CST 2011
+	
+
+4)DO YOUR JOB ON THOUNDS OF COMPUTERS WITH CMTK/CMTKD
+
+when you want to run some command or transfer a file to thounds of computers, just collect all host name or ip address
+of all the hosts and store them in a text file. one lines standards for one host name or host address. for example:
+
+cat dev.txt
+#test1.net
+test2.corp.net
+10.32.102.21
 
 
-3)CONFIGURE CMTK AND CMTKD
+line with "#" started will be recognized as a comment, no message will be send to it.
 
+the method to manupulate all hosts in dev.txt is so simple:
 
-4)USING IT IN YOUR JOB
-test
+	cmtk -f dev.txt -c "date"
+
+	cmtk -f dev.txt -u "/tmp/1.rpm" -d /root/2.rpm
+
+5) MORE OVER
+for more function and detailed usage of cmtk and cmtkd, you may get help from other documents from my website or
+bbs of chinaunix:
+	http://bbs.chinaunix.net/forum-185-1.html
+and you may contact me directlly, the email address is <duanjigang1983@gmail.com or  cmesoft@126.com for china users>
+
+I am glad to receive any suggestion or bugs from you on cmtk and cmtkd.
+						
+						--------duanjigang1983@2011-09-23 <duanjigang1983@gmail.com>
+
