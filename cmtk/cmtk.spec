@@ -40,9 +40,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/cmtk
 /etc/cmtk/cmtk_config.ini
 %ifarch x86_64
-/usr/local/lib64/libIce.so.3.3.1
-/usr/local/lib64/libIceUtil.so.3.3.1
+/usr/local/Ice-3.3.1/lib64/libIce.so.3.3.1
+/usr/local/Ice-3.3.1/lib64/libIceUtil.so.3.3.1
 %else
-/usr/local/lib/libIce.so.3.3.1
-/usr/local/lib/libIceUtil.so.3.3.1
+/usr/local/Ice-3.3.1/lib/libIce.so.3.3.1
+/usr/local/Ice-3.3.1/lib/libIceUtil.so.3.3.1
 %endif
