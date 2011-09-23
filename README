@@ -35,6 +35,12 @@ Install Ice
 	tar -zxvf Ice-3.3.1.tar.gz
 	cd Ice-3.3.1/
 	cd cpp
+attention, when the compiler complains something like "can not find bzlib.h", try to resolve this by install
+then bzip2-devel:
+yum install bzip2-devel
+and so is expat-devel and db4-devel when expat and db can not be found.
+
+
 	
 then change the content of 'prefix' in file "config/Make.rules",default value is:
 	prefix                   ?= /opt/Ice-$(VERSION)
