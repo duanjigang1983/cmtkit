@@ -58,7 +58,7 @@ int init_parameters(int argc, char* argv[])
 	int len = 0;
 	memset (g_client_config.conf, 0, sizeof(g_client_config.conf));
 
-	while ((c = getopt (argc, argv, "p:h:P:H:f:c:n:u:d:t:bsax")) != -1) 
+	while ((c = getopt (argc, argv, "p:h:P:H:f:c:n:u:d:t:bsaxv")) != -1) 
        {   
                 switch (c) 
                 {   
@@ -197,6 +197,11 @@ int init_parameters(int argc, char* argv[])
                                 error  = 1;
                                 printf ("option '%c' need a parameter\n", optopt);
                                 break;
+			//added version by duanjigang@2011-10-29 13:50 start
+			case 'v':
+				show_version (argc, argv);
+				return 0;	
+			//added version by duanjigang@2011-10-29 13:50 start
                         default:
                                 printf ("unknow opt:%s\n", optarg);
                                 error = 1;
@@ -1121,10 +1126,39 @@ char *	get_username(uid_t uid)
 	if (!find) return NULL;
 	return szret;
 }
+static opt_help_t opt_list [] =
+{
+	{ "-p", "remote port", 1},
+	{ "-h", "remotee host", 1},
+	{ "-f", "config file", 1},
+	{ "-c", "command to run", 1},
+	{ "-n", "task number", 1},
+	{ "-u", "file to update", 1},
+	{ "-d", "dest file to save", 1},
+	{ "-s", "run command silent", 1},
+	{ "-t", "time out value", 1},
+	{ "-a", "authorize user", 1},
+	{ "-v", "show cmtk version", 1}
+};
+
 void print_usage(int argc, char* argv[])
 {
-	//printf ("usage:%s\n\t[-p remote port]\n\t[-h remote host]\n\t[-P local port]\n\t[-H localhost]\n\t[-f configfile]\n\t[-c command]\n\t[-n task number]\n\t[-u file to update]\n\t[-d dest_file]\n\t[-s run command in silent]\n\t[-t time out]\n\t[-a auth]\n",
-	printf ("usage:%s\n\t[-p remote port\t\t]\n\t[-h remote host\t\t]\n\t[-f configfile\t\t]\n\t[-c command\t\t]\n\t[-n task number\t\t]\n\t[-u file to update\t]\n\t[-d dest_file\t\t]\n\t[-s run command silent\t]\n\t[-t time out\t\t]\n\t[-a auth\t\t]\n",
-		argv[0]); 
-
+	//added by duanjigang@2011-10-29 --start
+	printf ("usage:%s\n", argv[0]);
+	for (unsigned int i = 0; i < sizeof(opt_list)/sizeof(opt_help_t); i++)
+	{
+		opt_help_t * oh = opt_list + i;
+		if (oh->show)
+		{
+			printf ("\t[%5s\t%-25s]\n", oh->opt, oh->desc);
+		}
+	}
+	//added by duanjigang@2011-10-29 --end
+}
+//added by duanjigang1983@2011-10-29 13:50
+int 	show_version (int argc, char* argv[])
+{
+		printf ("%s version list:\n", argv[0]);
+		printf ("\t v1.0 2011-10-29:create version by duanjigang1983\n");
+		return 0;;
 }

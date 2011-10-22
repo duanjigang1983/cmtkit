@@ -32,5 +32,6 @@ extern void *	work_thread_func(void *arg);
 extern bool	run_over(void);
 extern void	show_results(void);
 extern char *	get_username(uid_t uid);
+extern int 	show_version (int argc, char* argv[]);
 
 #endif

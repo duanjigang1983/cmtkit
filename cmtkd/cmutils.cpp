@@ -25,7 +25,7 @@ int	parse_options (int argc, char* argv[])
      	char ec;
 	int error = 0;
        
-	while ((c = getopt (argc, argv, "p:dsat:T:i:h")) != -1)
+	while ((c = getopt (argc, argv, "p:dsat:T:i:hv")) != -1)
 	{
          	switch (c)
            	{
@@ -102,6 +102,11 @@ int	parse_options (int argc, char* argv[])
 				printf ("\t-a\t--active\t update task activly\n");
 				error = 1;
 				break;
+			//added by duanjigang1983@2011-10-29 13:44 for version --start
+			case 'v':
+				show_version(argc, argv);
+				return 0;
+			//added by duanjigang1983@2011-10-29 13:44 for version --end
 			default:
 				printf ("unknow opt:%s\n", optarg);
 				error = 1;
@@ -120,5 +125,12 @@ int	parse_options (int argc, char* argv[])
 		//	g_server_config.port, g_server_config.threadnum, g_server_config.mode ? "yes":"no");
 	}
 	g_server_config.auth_on = atoi (get_conf("cmtools/general/auth", "1"));
+	return 1;
+}
+
+int 	show_version 	(int argc, char* argv[])
+{
+	printf ("%s version list:\n", argv[0]);
+	printf ("\tv1.0 2011-10-29:create version by duanjigang1983\n");
 	return 1;
 }

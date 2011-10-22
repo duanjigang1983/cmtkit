@@ -181,6 +181,15 @@ typedef struct
 	char	hostname[64];
 }ip_struct_t;
 
+//added by duanjigang1983@gmail.com @2011-10-29 --start
+typedef struct 
+{
+	char opt[10];
+	char desc[30];
+	unsigned char show;
+}opt_help_t;
+//added by duanjigang1983@gmail.com @2011-10-29 --end
+
 char*	get_conf(const char* path, const char* dft);
 extern int 	mkdir_rec(const char* path);
 #define TASK_POOL_SIZE 200 //size of task pool
