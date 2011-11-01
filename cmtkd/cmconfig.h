@@ -66,67 +66,12 @@ typedef  struct
 }cmdev_t;
 //function to handle message for each device
 typedef int(*host_func_t)(cmdev_t * dev);
-
-//define for each task or thread
-typedef struct 
-{
-	time_t		start_time; //when it began run
-	time_t 		finish_time; //when it run over
-	#ifdef __LINUX__
-	pthread_t 	tid; //thread id or task id
-	#else
-	int		tid;
-	#endif
-	cmdev_t * 	dev_list[MAX_DEV_THREAD]; //all device(s) for this thread to serve
-	int	  	dev_num;//number of device		
-	bool		over;//whether this thread run over ?
-	int 		index; //index of this thread or task 
-}thread_t;
-
-//define for thread pool entry
-typedef struct 
-{
-	thread_t  thread[MAX_TASK_NUM]; //thread list 
-	int	  th_num;//thread number
-}thread_pool_t;
-
 //define for device list
 typedef struct
 {
 	cmdev_t dev_list[MAX_DEV]; //device list
 	int   dev_num; //device number
 }dev_list_t;
-
-//defining config information for client config
-#define MAX_LOCAL_ADDR 16
-#define USER_NAME 64
-typedef struct 
-{
-	unsigned short 	remote_port;		//which port to connect 
-	unsigned short	local_port;		//when address to connect
-	unsigned short 	forbid_root;		//forbid root login or run flag
-	unsigned short	tasknum;		//how many tasks are running
-	unsigned short  active;			//get task actively
-	unsigned short  color;			//print with color
-
-	unsigned int	local_addr; 		//tell him where to reply the command
-	unsigned int	remote_addr;		//same as above
-	char		remote_host_name[HOST_NAME];
-	unsigned int	time_out;		//added @2011-05-18
-	char		command[CMD_LEN];	//which command to run
-	char		file[CONF_FILE];	//file to upload
-	char		dst_file[CONF_DIR];		//where to upload the file on dest box
-	char		mode;			//1 for cmd and 2 for file
-	char		conf[CONF_FILE];	//where the ip list stored when we want to run a batch command
-	char		run_mode;		//1 for real time and 2 for background
-	char		silent;			//1 store result in files or print it to stdout
-	device_t	iplist[MAX_LOCAL_ADDR];
-	unsigned int 	ipnum;
-	//added by duanjigang@2011-08-01 --start
-	char 		username[USER_NAME];
-	char		login	[USER_NAME];
-	//added by duanjigang@2011-08-01 --end
-}cm_client_config_t;
 //thread status, maybe useless
 enum status 
 {

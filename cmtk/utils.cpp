@@ -23,6 +23,8 @@ int send_cmd2host (cmdev_t* dev);
 int send_file2host (cmdev_t* dev);
 //send notify message to host
 int send_notify2host (cmdev_t *dev);
+//fetch file from host
+int fetch_file_from_host (cmdev_t *dev);
 
 int load_file2msg(char * szfile);
 const char * error_msg(int errcode);
@@ -42,6 +44,7 @@ int init_parameters(int argc, char* argv[])
 		return 0;
 	}
 	
+	memset (&g_client_config, 0, sizeof(g_client_config));
 	g_client_config.remote_port = 0;
 	g_client_config.remote_addr = 0;
 	g_client_config.local_port = 0;
@@ -56,9 +59,8 @@ int init_parameters(int argc, char* argv[])
 	//added by djg@2011-03-09--end
 	struct hostent *host  = 0;
 	int len = 0;
-	memset (g_client_config.conf, 0, sizeof(g_client_config.conf));
 
-	while ((c = getopt (argc, argv, "p:h:P:H:f:c:n:u:d:t:bsaxv")) != -1) 
+	while ((c = getopt (argc, argv, "p:h:P:H:f:c:n:u:d:t:bsaxvl:r:")) != -1) 
        {   
                 switch (c) 
                 {   
@@ -169,14 +171,28 @@ int init_parameters(int argc, char* argv[])
                                 break;
 			//command 
 			case 'c':
+				if (g_client_config.mode)
+				{
+					printf ("do not set duplicate task with '-c', already set\n");
+					error = 1;
+					break;
+				}
 				g_client_config.mode = MODE_CMD;
 				//strcpy(g_client_config.command, optarg);
 				memcpy(g_client_config.command, optarg, strlen(optarg));
                                 break;
 			//update file name
 			case 'u':
+
+				if (g_client_config.mode)
+				{
+					printf ("do not set duplicate task with '-u', already set\n");
+					error = 1;
+					break;
+				}
+
 				strcpy(g_client_config.file, optarg);
-				g_client_config.mode = MODE_FILE;
+				g_client_config.mode = MODE_UPLOAD_FILE;
 				break;
 
 			//destination directory
@@ -201,7 +217,25 @@ int init_parameters(int argc, char* argv[])
 			case 'v':
 				show_version (argc, argv);
 				return 0;	
-			//added version by duanjigang@2011-10-29 13:50 start
+			//added version by duanjigang@2011-10-29 13:50 finish
+
+			//added file fetch by duanjigang1983@2011-11-01 --start
+			case 'r': //retmote file to fetch
+
+				if (g_client_config.mode)
+				{
+					printf ("do not set duplicate task with '-r', already set\n");
+					error = 1;
+					break;
+				}
+				g_client_config.mode = MODE_DOWNLOAD_FILE;
+				strcpy(g_client_config.remote_file, optarg);
+				break;
+
+			case 'l': //local file to save
+				strcpy(g_client_config.local_file, optarg);
+				break;
+			//added file fetch by duanjigang1983@2011-11-01 -finish
                         default:
                                 printf ("unknow opt:%s\n", optarg);
                                 error = 1;
@@ -302,45 +336,42 @@ int init_parameters(int argc, char* argv[])
 		goto ret;
 	}
 	//check mode
-	if ((g_client_config.mode != MODE_CMD) && (g_client_config.mode != MODE_FILE))
+	//if ((g_client_config.mode != MODE_CMD) && (g_client_config.mode != MODE_UPLOAD_FILE))
+	if ((g_client_config.mode != MODE_CMD) && 
+		(g_client_config.mode != MODE_UPLOAD_FILE)&&
+		(g_client_config.mode != MODE_DOWNLOAD_FILE))
 	{
-		printf ("please specify the command type with '-c command' or '-u update files'\n");
+		printf ("please specify the command type with '-c command' or '-u update files' or '-r remote file'\n");
 		error = 1;
 		goto ret;
 	}
-	//check file
-	if (g_client_config.mode == MODE_FILE)
+
+	switch (g_client_config.mode)
 	{
-		if (access(g_client_config.file, R_OK))
-		{
-			printf ("invalid update file '%s'\n", g_client_config.file);
-			error = 1;
-			goto ret;
-		}
-		g_host_func = send_file2host;
-	
-		//added @2011-05-05 --start 	
-		/*
-		if (g_client_config.active)
-		{
-			//added @2011-05-09--for reply server check --start
-			if (!g_client_config.local_port || !g_client_config.local_addr)
+		case MODE_CMD://run command	
+			g_host_func = send_cmd2host;
+			break;
+		case MODE_UPLOAD_FILE://upload file
+			if (access(g_client_config.file, R_OK))
 			{
-				printf ("please specify a reply address [-H host] and a port [-P port] when send file actively\n");
+				printf ("invalid update file '%s'\n", g_client_config.file);
 				error = 1;
 				goto ret;
 			}
-			//added @2011-05-09--for reply server check --finish
-
-			g_host_func = send_notify2host;
-		}
-		//added @2011-05-05 --finish	
-		*/
-		
-	}else
-	{
-		g_host_func = send_cmd2host;
+			g_host_func = send_file2host;
+			break;
+		case MODE_DOWNLOAD_FILE:
+		default://download file
+			g_host_func = fetch_file_from_host;
+			if (!strlen(g_client_config.remote_file) || !strlen(g_client_config.local_file))
+			{
+				printf ("please specify local file and remote file when fetching a file\n");
+				error = 1;
+				goto ret;
+			}
+			break;
 	}
+	//check file
 	//added by duanjigang@2011-08-01 for username and login infor --start
 	uid = getuid();	
 	szRet = get_username(uid);
@@ -465,7 +496,8 @@ int init_tasks(void)
 
 	//load file to transfer
 		
-	if (MODE_FILE == g_client_config.mode)
+	g_file_msg.filedata.clear();	
+	if (MODE_UPLOAD_FILE == g_client_config.mode)
 	{
 		if (load_file2msg(g_client_config.file) <= 0)
 		{
@@ -555,7 +587,7 @@ int load_file2msg(char * szfile)
 	sprintf (base, "%s", basename(szfile));	
 	g_file_msg.head.file 		= string (base);
 	g_file_msg.head.dstfile 		= string(g_client_config.dst_file);
-	g_file_msg.head.msgtype 	= MSG_TYPE_FILE;
+	g_file_msg.head.msgtype 	= MSG_TYPE_UP_FILE;
 
 	//--added by duanjigang@2011-08-01 for login and user auth --start
 	g_file_msg.head.username = string (g_client_config.username);	
@@ -961,20 +993,31 @@ void	show_results(void)
 void	show_result_front(void)
 {
 	int i = 0;
+	if (g_client_config.mode & MODE_CMD)
+	{
+		printf ("run command [%s]:\n", g_client_config.command);
+	}
+
+	if (g_client_config.mode & MODE_UPLOAD_FILE)
+	{
+		printf ("upload file [%s] to destination [%s]:\n", g_client_config.file, g_client_config.dst_file);
+	}
+
+	if (g_client_config.mode & MODE_DOWNLOAD_FILE)
+	{
+		printf ("download from [%s] to local [%s]:\n", g_client_config.remote_file, g_client_config.local_file);
+	}
+
+	/*
 	bool cmd  = (g_client_config.mode == MODE_CMD);
 	if (cmd)
 	{
 		 //printf ("run command [%s]:\n", g_client_config.command);
 	}
-	else
+	else if
 	{
-		/*if (g_client_config.active)
-		{
-			printf ("notify host(s):\n");
-		}else
-		*/
 		printf ("upload file [%s] to destination [%s]:\n", g_client_config.file, g_client_config.dst_file);
-	}
+	}*/
 
 	for (i = 0; i < g_dev_list.dev_num; i++)
 	{
@@ -986,7 +1029,7 @@ void	show_result_front(void)
 		else
 		printf ("(%s):[%s]\n", p->dev_name,  szip);
 
-		if (cmd)
+		if (g_client_config.mode & MODE_CMD)
 		{
 			int j = 0;
 			int size = p->retmsg.size();
@@ -995,10 +1038,13 @@ void	show_result_front(void)
 				printf ("%s", p->retmsg[j].c_str());
 			}
 			if (!size && (p->nret <= 0)) printf ("%s\n", error_msg(p->nret));
-		}else
+		}else if (g_client_config.mode & MODE_UPLOAD_FILE)
 		{
 			if (p->nret > 0) printf ("success\n");
 			else printf ("failed[%d]\n", p->nret);
+		}else
+		{
+			
 		}
 		printf ("\n");
 	}
@@ -1008,15 +1054,6 @@ void	show_result_front(void)
 void	show_result_silent(void)
 {
 	int i = 0;
-	bool cmd  = (g_client_config.mode == MODE_CMD);
-	if (cmd)
-	{
-		 //printf ("run command [%s]:\n", g_client_config.command);
-	}
-	else
-	{
-		 //printf ("deliver file [%s] to directory [%s]:\n", g_client_config.file, g_client_config.dir);
-	}
 	mkdir (RET_DIR, 0777);
 	char szpath[64] = {0};
 	unsigned int pid = getpid();
@@ -1050,7 +1087,7 @@ void	show_result_silent(void)
 			printf ("start = %lu\n", p->start_time);
 			printf ("finish = %lu\n\n", p->finish_time);
 		}
-		if (cmd)
+		if (g_client_config.mode & MODE_CMD)
 		{
 			int j = 0;
 			FILE * fp = fopen (szfile, "w");
@@ -1128,17 +1165,21 @@ char *	get_username(uid_t uid)
 }
 static opt_help_t opt_list [] =
 {
-	{ "-p", "remote port", 1},
-	{ "-h", "remotee host", 1},
+	{ "-p", "remote port to connect", 1},
+	{ "-h", "remotee host to connect", 1},
 	{ "-f", "config file", 1},
 	{ "-c", "command to run", 1},
 	{ "-n", "task number", 1},
-	{ "-u", "file to update", 1},
-	{ "-d", "dest file to save", 1},
+	{ "-u", "file path to update", 1},
+	{ "-d", "dest file path to save", 1},
 	{ "-s", "run command silent", 1},
-	{ "-t", "time out value", 1},
-	{ "-a", "authorize user", 1},
-	{ "-v", "show cmtk version", 1}
+	{ "-t", "time out value ", 1},
+	{ "-a", "authorize user on", 1},
+	{ "-v", "show cmtk version list", 1},
+	//added by duanjigang@2011-11-01 for fetching file --start
+	{ "-r", "remote file to download", 1},	
+	{ "-l", "local file  to save", 1}	
+	//added by duanjigang@2011-11-01 for fetching file --finish
 };
 
 void print_usage(int argc, char* argv[])
@@ -1162,3 +1203,92 @@ int 	show_version (int argc, char* argv[])
 		printf ("\t v1.0 2011-10-29:create version by duanjigang1983\n");
 		return 0;;
 }
+//added by duanjigang1983@2011-11-01 --start
+int fetch_file_from_host (cmdev_t *dev)
+{
+
+	int nRet = RET_SUCCES;
+	bool connected = false;
+	char szip[20] = {0};
+	CommandMessage g_fetch_msg; 
+	printf ("fetch_file_from_host......................\n");
+	if (!dev)
+	{
+		 printf ("invalid parameter[%s:%d]\n",__FILE__, __LINE__);
+		 exit(0);
+	}
+	STR_IP (szip, dev->dev_ip);
+
+	g_fetch_msg.head.msgtype = MSG_TYPE_DOWN_FILE;
+	for (unsigned int i = 0; i < g_client_config.ipnum; i++)
+	{
+		g_fetch_msg.head.srchost.push_back (g_client_config.iplist[i].ip);
+	}
+
+	try
+	{
+		char szproxy [PROXY_LEN] = {0}; // what we use to identify a connection
+		
+		g_fetch_msg.filedata.clear();	
+		sprintf (szproxy, "cmdhelper:tcp -h %s -p %u -t %u", 
+		szip, g_client_config.remote_port,
+		g_client_config.time_out * 1000);
+		printf ("===%s\n", szproxy);
+		Ice::ObjectPrx  base = g_ic->stringToProxy(szproxy);
+		cmdhelper::CmdMessageHandlerPrx  client = 
+		CmdMessageHandlerPrx::checkedCast(base);
+                if(!client)
+                {
+			//throw "invalud proxy:ComPlusBasePrx::checkedCast(base)";
+        		nRet = RET_CONNECT_FAILED;
+			goto ret;
+		}
+		connected = true;
+		g_fetch_msg.head.hostaddr 	= 	g_client_config.local_addr;
+		g_fetch_msg.head.hostport 	= 	g_client_config.local_port;
+		//added by duanjigang1983@2011-11-01 --start
+		g_fetch_msg.head.remotefile	= 	g_client_config.remote_file;
+		g_fetch_msg.head.localfile	=	g_client_config.local_file;		
+		//added by duanjigang1983@2011-11-01 --finish
+		g_fetch_msg.head.timestamp	=	time(0);
+		g_fetch_msg.head.taskid		= 	getpid();	
+		g_fetch_msg.head.commandid	=	g_command_id;
+		g_fetch_msg.head.localaddr	=	dev->dev_ip;
+
+		g_fetch_msg.head.username = string (g_client_config.username);	
+		g_fetch_msg.head.login = string (g_client_config.login);	
+
+		char index[20] = {0};
+		sprintf (index, "%lu", dev->dev_index);
+		g_fetch_msg.head.index = string (index);		
+		// try to request the file
+		CommandMessage ret_msg = client->ProcessMessage(g_fetch_msg);
+		//printf ("sending file message, index = %s\n", g_file_msg.head.index.c_str());
+		nRet = ret_msg.head.nret;
+	}catch(const Ice::Exception & ex)
+        {
+                cerr << ex << endl;
+		nRet = RET_CONNECT_FAILED;
+		if (connected)
+		{
+			nRet = RET_RUNCMD_FAILED;
+		}
+		goto ret;
+        }catch(const char* msg)
+        {
+                cerr << msg << endl;
+		nRet = RET_CONNECT_FAILED;
+		if (connected)
+		{
+			nRet = RET_RUNCMD_FAILED;
+		}
+
+		goto ret;
+	}
+ret:
+	return nRet;
+
+
+	return 1;
+}
+//added by duanjigang1983@2011-11-01 --finish

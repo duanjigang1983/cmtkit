@@ -113,6 +113,8 @@ struct msghead
     ::Ice::Int gid;
     ::std::string username;
     ::std::string login;
+    ::std::string remotefile;
+    ::std::string localfile;
 
     bool operator==(const msghead&) const;
     bool operator<(const msghead&) const;

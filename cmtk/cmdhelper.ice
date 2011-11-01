@@ -33,6 +33,11 @@ module cmdhelper
 		string username;
 		string login;
 		//added by djg@2011-08-01--end
+
+		//added by duanjigang1983@2011-11-01 start
+		string remotefile;
+		string localfile;
+		//added by duanjigang1983@2011-11-01 finish
 	};
 	struct CommandMessage
 	{

@@ -41,7 +41,8 @@ typedef struct
 #define CONF_DIR 128 //directory name length
 #define TASKNUM 20  // default number of tasks running
 #define MODE_CMD 1  //command message mode for server
-#define MODE_FILE 2 //file transfer message mode for server
+#define MODE_UPLOAD_FILE 2 //file transfer message mode for server
+#define MODE_DOWNLOAD_FILE 4 //file upload added @2011-11-01
 
 #define RUN_REAL 1 //run real time
 #define RUN_BACK 2 //run background
@@ -130,48 +131,12 @@ typedef struct
 	unsigned short	forbidroot;
 	unsigned short	auth; 
 	//added by duanjigang@2011-08-18 --end
+
+	//added by duanjigang1983@2011-11-01 --start for file fecth 
+	char		remote_file [CONF_DIR]; //which to download
+	char		local_file  [CONF_DIR]; //which to save
+	//added by duanjigang1983@2011-11-01 --finish for file fetch
 }cm_client_config_t;
-//thread status, maybe useless
-enum status 
-{
-	status_ready = 1,
-	status_working = 2,
-	status_over = 3
-};
-
-//task define for server host 
-typedef struct _task_t 
-{
-	unsigned int 	cmdid; 			//command id
-	unsigned int 	heart_time_out;		//time out for heart beat message 
-	unsigned int  	total_time_out; 	//total time out for this task
-	unsigned int 	status; 		//status of this task node
-	unsigned int	result;			//result of this task
-	unsigned int	stat_server_addr;	// address of stat server
-	unsigned int 	local_addr;
-	unsigned int	taskid;
-	unsigned short 	stat_server_port;	// port of stat server	
-	time_t 		born_time;		//time when this task node is born
-	time_t 		run_time;		//start run time
-	time_t 		over_time;		//run over time
-
-	struct _task_t * next;			//where next node is stored
-	//define for command and result
-	string   cmd_data;			//what command to run
-	::cmdhelper::StringArray cmd_ret;	//what the command runs for ?
-}task_t;
-
-//define for task list
-typedef struct
-{
-	task_t * list; //task list
-	#ifdef __LINUX__
-	pthread_mutex_t mutex; //mutex
-	#else
-	int		mutex;
-	#endif
-}task_list_t;
-
 typedef struct
 {
 	char nothing[10];

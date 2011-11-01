@@ -15,7 +15,7 @@ CLI_OBJS	Makefile	/^CLI_OBJS=cmdhelper.o utils.o NetHelper.o syslog_utils.o  cm_
 CLOSE	os_independent.h	15;"	d
 CLOSE	os_independent.h	41;"	d
 CLOSE_FILE	os_independent.h	14;"	d
-CMD_LEN	cmconfig.h	48;"	d
+CMD_LEN	cmconfig.h	49;"	d
 CMD_TYPE	constdef.h	/^enum CMD_TYPE$/;"	g
 CMD_TYPE_CONF	constdef.h	/^	CMD_TYPE_CONF = 2$/;"	e	enum:CMD_TYPE
 CMD_TYPE_NOTIFY	constdef.h	/^	CMD_TYPE_NOTIFY = 1,$/;"	e	enum:CMD_TYPE
@@ -37,7 +37,7 @@ DEV_TYPE_CMD	cmconfig.h	8;"	d
 DEV_TYPE_STAT	cmconfig.h	9;"	d
 DFLAG	Makefile	/^DFLAG=-lIce -lIceUtil -lpthread -L\/usr\/local\/Ice-3.3.1\/lib$/;"	m
 DFT_DM	cmconfig.h	5;"	d
-DFT_LOGIN	constdef.h	14;"	d
+DFT_LOGIN	constdef.h	15;"	d
 DFT_MODE	cmconfig.h	6;"	d
 DFT_PORT	cmconfig.h	4;"	d
 DFT_THREAD	cmconfig.h	7;"	d
@@ -45,8 +45,8 @@ ErrorOccurence	IniHelper.cpp	/^int CIniHelper::ErrorOccurence()$/;"	f	class:CIni
 GREEN	ColorDefine.h	6;"	d
 GetNetip	NetHelper.cpp	/^int	GetNetip(device_t *list)$/;"	f
 GetNetip	NetHelper.cpp	/^int	GetNetip(unsigned int *ip)$/;"	f
-HOST_NAME	cmconfig.h	53;"	d
-INFO_DIR	constdef.h	13;"	d
+HOST_NAME	cmconfig.h	54;"	d
+INFO_DIR	constdef.h	14;"	d
 IceDelegate	cmdhelper.h	/^namespace IceDelegate$/;"	n
 IceDelegateD	cmdhelper.h	/^namespace IceDelegateD$/;"	n
 IceDelegateM	cmdhelper.h	/^namespace IceDelegateM$/;"	n
@@ -59,24 +59,26 @@ LIGHT_GREEN	ColorDefine.h	7;"	d
 LIGHT_PURPLE	ColorDefine.h	14;"	d
 LIGHT_RED	ColorDefine.h	5;"	d
 MAX	IniHelper.cpp	3;"	d	file:
-MAX_DEV	cmconfig.h	51;"	d
-MAX_DEV_THREAD	cmconfig.h	52;"	d
-MAX_LOCAL_ADDR	cmconfig.h	101;"	d
+MAX_DEV	cmconfig.h	52;"	d
+MAX_DEV_THREAD	cmconfig.h	53;"	d
+MAX_LOCAL_ADDR	cmconfig.h	102;"	d
 MAX_SEC	IniHelper.h	15;"	d
-MAX_TASK_NUM	cmconfig.h	50;"	d
+MAX_TASK_NUM	cmconfig.h	51;"	d
 MAX_VAL	os_independent.h	53;"	d
 MAX_VAR	IniHelper.h	14;"	d
 MIN	IniHelper.cpp	4;"	d	file:
 MIN_VAL	os_independent.h	54;"	d
 MODE_CMD	cmconfig.h	43;"	d
-MODE_FILE	cmconfig.h	44;"	d
+MODE_DOWNLOAD_FILE	cmconfig.h	45;"	d
+MODE_UPLOAD_FILE	cmconfig.h	44;"	d
 MSG_DONTWAIT	os_independent.h	48;"	d
 MSG_NOSIGNAL	os_independent.h	45;"	d
 MSG_TYPE_CMD	constdef.h	4;"	d
-MSG_TYPE_FILE	constdef.h	5;"	d
+MSG_TYPE_DOWN_FILE	constdef.h	6;"	d
 MSG_TYPE_STAT	constdef.h	3;"	d
+MSG_TYPE_UP_FILE	constdef.h	5;"	d
 NONE	ColorDefine.h	3;"	d
-PROXY_LEN	constdef.h	6;"	d
+PROXY_LEN	constdef.h	7;"	d
 PURPLE	ColorDefine.h	13;"	d
 PointerType	cmdhelper.h	/^    typedef CmdMessageHandlerPtr PointerType;$/;"	t	class:cmdhelper::CmdMessageHandler
 ProcessCmd	cmdhelper.cpp	/^IceDelegateD::cmdhelper::CmdMessageHandler::ProcessCmd(const ::cmdhelper::command& cmd, const ::Ice::Context* __context)$/;"	f	class:IceDelegateD::cmdhelper::CmdMessageHandler
@@ -101,12 +103,12 @@ ProcessNotify	cmdhelper.h	/^    ::cmdhelper::response ProcessNotify(const ::cmdh
 ProcessNotify	cmdhelper.h	/^    ::cmdhelper::response ProcessNotify(const ::cmdhelper::command& cmd, const ::Ice::Context& __ctx)$/;"	f	class:IceProxy::cmdhelper::CmdMessageHandler
 ProxyType	cmdhelper.h	/^    typedef CmdMessageHandlerPrx ProxyType;$/;"	t	class:cmdhelper::CmdMessageHandler
 RED	ColorDefine.h	4;"	d
-RET_CONNECT_FAILED	constdef.h	9;"	d
-RET_DIR	constdef.h	12;"	d
-RET_RUNCMD_FAILED	constdef.h	10;"	d
-RET_SUCCES	constdef.h	11;"	d
-RUN_BACK	cmconfig.h	47;"	d
-RUN_REAL	cmconfig.h	46;"	d
+RET_CONNECT_FAILED	constdef.h	10;"	d
+RET_DIR	constdef.h	13;"	d
+RET_RUNCMD_FAILED	constdef.h	11;"	d
+RET_SUCCES	constdef.h	12;"	d
+RUN_BACK	cmconfig.h	48;"	d
+RUN_REAL	cmconfig.h	47;"	d
 ReadInt	IniHelper.cpp	/^int CIniHelper::ReadInt(const char *szSec, const char *szName, int nDefault)$/;"	f	class:CIniHelper
 ReadSection	IniHelper.cpp	/^int CIniHelper::ReadSection(section & pSec)$/;"	f	class:CIniHelper
 ReadString	IniHelper.cpp	/^char* CIniHelper::ReadString(const char *szSec, const char *szName, const char *szDefault)$/;"	f	class:CIniHelper
@@ -116,10 +118,10 @@ STR_IP	os_independent.h	50;"	d
 StringArray	cmdhelper.h	/^typedef ::std::vector< ::std::string> StringArray;$/;"	t	namespace:cmdhelper
 StringArray2	cmdhelper.h	/^typedef ::std::vector< ::cmdhelper::StringArray> StringArray2;$/;"	t	namespace:cmdhelper
 TASKNUM	cmconfig.h	42;"	d
-TASK_POOL_SIZE	cmconfig.h	186;"	d
+TASK_POOL_SIZE	cmconfig.h	160;"	d
 UNLINK	os_independent.h	19;"	d
 UNLINK	os_independent.h	42;"	d
-USER_NAME	cmconfig.h	102;"	d
+USER_NAME	cmconfig.h	103;"	d
 VAR_NAME	IniHelper.h	11;"	d
 VAR_VAL	IniHelper.h	12;"	d
 WHITE	ColorDefine.h	18;"	d
@@ -163,12 +165,10 @@ __write	cmdhelper.cpp	/^cmdhelper::magicmsg::__write(::IceInternal::BasicStream*
 __write	cmdhelper.cpp	/^cmdhelper::msghead::__write(::IceInternal::BasicStream* __os) const$/;"	f	class:cmdhelper::msghead
 __write	cmdhelper.cpp	/^cmdhelper::response::__write(::IceInternal::BasicStream* __os) const$/;"	f	class:cmdhelper::response
 __writeStringArray2	cmdhelper.cpp	/^cmdhelper::__writeStringArray2(::IceInternal::BasicStream* __os, const ::cmdhelper::StringArray* begin, const ::cmdhelper::StringArray* end)$/;"	f	class:cmdhelper
-_task_t	cmconfig.h	/^typedef struct _task_t $/;"	s
 active	cmconfig.h	/^	unsigned short  active; \/\/update task active$/;"	m	struct:__anon1
 atoll	os_independent.h	/^static _int64 atoll(const char *string){return _atoi64(string);} $/;"	f
 auth	cmconfig.h	/^	unsigned short	auth; $/;"	m	struct:__anon6
 auth_on	cmconfig.h	/^	unsigned short  auth_on;\/\/$/;"	m	struct:__anon1
-born_time	cmconfig.h	/^	time_t 		born_time;		\/\/time when this task node is born$/;"	m	struct:_task_t
 byteArray	cmdhelper.h	/^typedef ::std::vector< ::Ice::Byte> byteArray;$/;"	t	namespace:cmdhelper
 clientaddr	cmdhelper.h	/^    ::Ice::Long clientaddr;$/;"	m	struct:cmdhelper::command
 clientid	cmdhelper.h	/^    ::Ice::Long clientid;$/;"	m	struct:cmdhelper::command
@@ -176,15 +176,12 @@ close_syslog	syslog_utils.cpp	/^int close_syslog(void)$/;"	f
 cm_client_config_t	cmconfig.h	/^}cm_client_config_t;$/;"	t	typeref:struct:__anon6
 cm_server_config_t	cmconfig.h	/^}cm_server_config_t;$/;"	t	typeref:struct:__anon1
 cmd	cmdhelper.h	/^    ::std::string cmd;$/;"	m	struct:cmdhelper::CommandMessage
-cmd_data	cmconfig.h	/^	string   cmd_data;			\/\/what command to run$/;"	m	struct:_task_t
-cmd_ret	cmconfig.h	/^	::cmdhelper::StringArray cmd_ret;	\/\/what the command runs for ?$/;"	m	struct:_task_t
 cmdev_t	cmconfig.h	/^}cmdev_t;$/;"	t	typeref:struct:__anon2
 cmdhelper	cmdhelper.h	/^namespace cmdhelper$/;"	n
 cmdhelper	cmdhelper.h	/^namespace cmdhelper$/;"	n	namespace:IceDelegate
 cmdhelper	cmdhelper.h	/^namespace cmdhelper$/;"	n	namespace:IceDelegateD
 cmdhelper	cmdhelper.h	/^namespace cmdhelper$/;"	n	namespace:IceDelegateM
 cmdhelper	cmdhelper.h	/^namespace cmdhelper$/;"	n	namespace:IceProxy
-cmdid	cmconfig.h	/^	unsigned int 	cmdid; 			\/\/command id$/;"	m	struct:_task_t
 cmdid	cmdhelper.h	/^    ::Ice::Int cmdid;$/;"	m	struct:cmdhelper::command
 cmdtype	cmdhelper.h	/^    ::Ice::Int cmdtype;$/;"	m	struct:cmdhelper::command
 color	cmconfig.h	/^	unsigned short  color;			\/\/print with color$/;"	m	struct:__anon6
@@ -195,6 +192,7 @@ conf	cmconfig.h	/^	char		conf[CONF_FILE];	\/\/where the ip list stored when we w
 daemon	cmconfig.h	/^	unsigned short 	daemon;$/;"	m	struct:__anon1
 data	cmdhelper.h	/^    ::cmdhelper::byteArray data;$/;"	m	struct:cmdhelper::command
 data	cmdhelper.h	/^    ::cmdhelper::byteArray data;$/;"	m	struct:cmdhelper::magicmsg
+desc	cmconfig.h	/^	char desc[30];$/;"	m	struct:__anon8
 dev_index	cmconfig.h	/^	unsigned long dev_index;$/;"	m	struct:__anon2
 dev_ip	cmconfig.h	/^	unsigned int dev_ip;  	\/\/device ip$/;"	m	struct:__anon2
 dev_list	cmconfig.h	/^	cmdev_t * 	dev_list[MAX_DEV_THREAD]; \/\/all device(s) for this thread to serve$/;"	m	struct:__anon3
@@ -211,6 +209,7 @@ entry_list	IniHelper.h	/^	var_entry entry_list[MAX_VAR];$/;"	m	struct:section
 entry_number	IniHelper.h	/^	int		entry_number;$/;"	m	struct:section
 error_msg	utils.cpp	/^const char * error_msg(int errcode)$/;"	f
 facility	syslog_utils.cpp	/^int facility = LOG_LOCAL5;$/;"	v
+fetch_file_from_host	utils.cpp	/^int fetch_file_from_host (cmdev_t *dev)$/;"	f
 file	cmconfig.h	/^	char		file[CONF_FILE];	\/\/file to upload$/;"	m	struct:__anon6
 file	cmdhelper.h	/^    ::std::string file;$/;"	m	struct:cmdhelper::msghead
 filedata	cmdhelper.h	/^    ::cmdhelper::byteArray filedata;$/;"	m	struct:cmdhelper::CommandMessage
@@ -234,11 +233,10 @@ get_conf	cm_utils.cpp	/^char*	get_conf(const char* path, const char* dft)$/;"	f
 get_username	utils.cpp	/^char *	get_username(uid_t uid)$/;"	f
 gid	cmdhelper.h	/^    ::Ice::Int gid;$/;"	m	struct:cmdhelper::msghead
 head	cmdhelper.h	/^    ::cmdhelper::msghead head;$/;"	m	struct:cmdhelper::CommandMessage
-heart_time_out	cmconfig.h	/^	unsigned int 	heart_time_out;		\/\/time out for heart beat message $/;"	m	struct:_task_t
 host	cmdhelper.h	/^    ::Ice::Long host;$/;"	m	struct:cmdhelper::command
 host_func_t	cmconfig.h	/^typedef int(*host_func_t)(cmdev_t * dev);$/;"	t
 hostaddr	cmdhelper.h	/^    ::Ice::Long hostaddr;$/;"	m	struct:cmdhelper::msghead
-hostname	cmconfig.h	/^	char	hostname[64];$/;"	m	struct:__anon8
+hostname	cmconfig.h	/^	char	hostname[64];$/;"	m	struct:__anon7
 hostport	cmdhelper.h	/^    ::Ice::Int hostport;$/;"	m	struct:cmdhelper::msghead
 ice_adapterId	cmdhelper.h	/^    ::IceInternal::ProxyHandle<CmdMessageHandler> ice_adapterId(const std::string& __id) const$/;"	f	class:IceProxy::cmdhelper::CmdMessageHandler
 ice_batchDatagram	cmdhelper.h	/^    ::IceInternal::ProxyHandle<CmdMessageHandler> ice_batchDatagram() const$/;"	f	class:IceProxy::cmdhelper::CmdMessageHandler
@@ -281,18 +279,18 @@ ip	NetHelper.h	/^		unsigned int ip;$/;"	m	struct:__anon9
 ipArray	cmdhelper.h	/^typedef ::std::vector< ::Ice::Long> ipArray;$/;"	t	namespace:cmdhelper
 ip_list	cmtkctl.cpp	/^ip_struct_t ip_list[500];$/;"	v
 ip_num	cmtkctl.cpp	/^int  ip_num = 0;$/;"	v
-ip_struct_t	cmconfig.h	/^}ip_struct_t;$/;"	t	typeref:struct:__anon8
-ipaddr	cmconfig.h	/^	unsigned int ipaddr;$/;"	m	struct:__anon8
+ip_struct_t	cmconfig.h	/^}ip_struct_t;$/;"	t	typeref:struct:__anon7
+ipaddr	cmconfig.h	/^	unsigned int ipaddr;$/;"	m	struct:__anon7
 iplist	cmconfig.h	/^	device_t	iplist[MAX_LOCAL_ADDR];$/;"	m	struct:__anon6
 ipnum	cmconfig.h	/^	unsigned int 	ipnum;$/;"	m	struct:__anon6
 key_t	os_independent.h	/^typedef int key_t;$/;"	t
 level	syslog_utils.cpp	/^int level = LOG_INFO; $/;"	v
-list	cmconfig.h	/^	task_t * list; \/\/task list$/;"	m	struct:__anon7
 load_file2msg	utils.cpp	/^int load_file2msg(char * szfile)$/;"	f
 local_addr	cmconfig.h	/^	unsigned int	local_addr; 		\/\/tell him where to reply the command$/;"	m	struct:__anon6
-local_addr	cmconfig.h	/^	unsigned int 	local_addr;$/;"	m	struct:_task_t
+local_file	cmconfig.h	/^	char		local_file  [CONF_DIR]; \/\/which to save$/;"	m	struct:__anon6
 local_port	cmconfig.h	/^	unsigned short	local_port;		\/\/when address to connect$/;"	m	struct:__anon6
 localaddr	cmdhelper.h	/^    ::Ice::Long localaddr;$/;"	m	struct:cmdhelper::msghead
+localfile	cmdhelper.h	/^    ::std::string localfile;$/;"	m	struct:cmdhelper::msghead
 log_on	syslog_utils.cpp	/^int log_on = 1;$/;"	v
 login	cmconfig.h	/^	char		login	[USER_NAME];$/;"	m	struct:__anon6
 login	cmdhelper.h	/^    ::std::string login;$/;"	m	struct:cmdhelper::msghead
@@ -313,12 +311,9 @@ mode	cmconfig.h	/^	unsigned short 	mode; \/\/ 1 for popen 2 for system$/;"	m	str
 more	cmdhelper.h	/^    ::Ice::Int more;$/;"	m	struct:cmdhelper::response
 msghead	cmdhelper.h	/^struct msghead$/;"	s	namespace:cmdhelper
 msgtype	cmdhelper.h	/^    ::Ice::Int msgtype;$/;"	m	struct:cmdhelper::msghead
-mutex	cmconfig.h	/^	int		mutex;$/;"	m	struct:__anon7
-mutex	cmconfig.h	/^	pthread_mutex_t mutex; \/\/mutex$/;"	m	struct:__anon7
 name	NetHelper.h	/^		char	name[10];$/;"	m	struct:__anon9
 netmask	NetHelper.h	/^		unsigned int netmask;$/;"	m	struct:__anon9
-next	cmconfig.h	/^	struct _task_t * next;			\/\/where next node is stored$/;"	m	struct:_task_t	typeref:struct:_task_t::_task_t
-nothing	cmconfig.h	/^	char nothing[10];$/;"	m	struct:__anon8
+nothing	cmconfig.h	/^	char nothing[10];$/;"	m	struct:__anon7
 nret	cmconfig.h	/^	int 	 nret;		\/\/return value > 0 success else failed$/;"	m	struct:__anon2
 nret	cmdhelper.h	/^    ::Ice::Int nret;$/;"	m	struct:cmdhelper::msghead
 operator !=	cmdhelper.h	/^    bool operator!=(const CommandMessage& __rhs) const$/;"	f	struct:cmdhelper::CommandMessage
@@ -353,30 +348,33 @@ operator >=	cmdhelper.h	/^    bool operator>=(const command& __rhs) const$/;"	f	
 operator >=	cmdhelper.h	/^    bool operator>=(const magicmsg& __rhs) const$/;"	f	struct:cmdhelper::magicmsg
 operator >=	cmdhelper.h	/^    bool operator>=(const msghead& __rhs) const$/;"	f	struct:cmdhelper::msghead
 operator >=	cmdhelper.h	/^    bool operator>=(const response& __rhs) const$/;"	f	struct:cmdhelper::response
+opt	cmconfig.h	/^	char opt[10];$/;"	m	struct:__anon8
+opt_help_t	cmconfig.h	/^}opt_help_t;$/;"	t	typeref:struct:__anon8
+opt_list	utils.cpp	/^static opt_help_t opt_list [] =$/;"	v	file:
 over	cmconfig.h	/^	bool		over;\/\/whether this thread run over ?$/;"	m	struct:__anon3
 over	cmconfig.h	/^	bool	 over;		\/\/is it run over ?$/;"	m	struct:__anon2
-over_time	cmconfig.h	/^	time_t 		over_time;		\/\/run over time$/;"	m	struct:_task_t
 pid	cmdhelper.h	/^    ::Ice::Int pid;$/;"	m	struct:cmdhelper::command
 port	cmconfig.h	/^	unsigned short 	port;$/;"	m	struct:__anon1
 port	cmdhelper.h	/^    ::Ice::Int port;$/;"	m	struct:cmdhelper::command
 print_thread_list	utils.cpp	/^void print_thread_list(void)$/;"	f
 print_usage	utils.cpp	/^void print_usage(int argc, char* argv[])$/;"	f
-rand_num1	cmconfig.h	/^	int rand_num1;$/;"	m	struct:__anon8
+rand_num1	cmconfig.h	/^	int rand_num1;$/;"	m	struct:__anon7
 remote_addr	cmconfig.h	/^	unsigned int	remote_addr;		\/\/same as above$/;"	m	struct:__anon6
+remote_file	cmconfig.h	/^	char		remote_file [CONF_DIR]; \/\/which to download$/;"	m	struct:__anon6
 remote_host_name	cmconfig.h	/^	char		remote_host_name[HOST_NAME];$/;"	m	struct:__anon6
 remote_port	cmconfig.h	/^	unsigned short 	remote_port;		\/\/which port to connect $/;"	m	struct:__anon6
+remotefile	cmdhelper.h	/^    ::std::string remotefile;$/;"	m	struct:cmdhelper::msghead
 response	cmdhelper.h	/^struct response$/;"	s	namespace:cmdhelper
-result	cmconfig.h	/^	unsigned int	result;			\/\/result of this task$/;"	m	struct:_task_t
 result	cmdhelper.h	/^    ::cmdhelper::StringArray result;$/;"	m	struct:cmdhelper::CommandMessage
 retmsg	cmconfig.h	/^	::cmdhelper::StringArray retmsg;\/\/result of command$/;"	m	struct:__anon2
 run_mode	cmconfig.h	/^	char		run_mode;		\/\/1 for real time and 2 for background$/;"	m	struct:__anon6
 run_over	utils.cpp	/^bool	run_over(void)$/;"	f
-run_time	cmconfig.h	/^	time_t 		run_time;		\/\/start run time$/;"	m	struct:_task_t
 runmode	cmdhelper.h	/^    ::Ice::Int runmode;$/;"	m	struct:cmdhelper::msghead
 section	IniHelper.h	/^struct section$/;"	s
 send_cmd2host	utils.cpp	/^int send_cmd2host (cmdev_t* dev)$/;"	f
 send_file2host	utils.cpp	/^int send_file2host (cmdev_t * dev)$/;"	f
 send_notify2host	utils.cpp	/^int send_notify2host (cmdev_t *dev)$/;"	f
+show	cmconfig.h	/^	unsigned char show;$/;"	m	struct:__anon8
 show_result_front	utils.cpp	/^void	show_result_front(void)$/;"	f
 show_result_silent	utils.cpp	/^void	show_result_silent(void)$/;"	f
 show_results	utils.cpp	/^void	show_results(void)$/;"	f
@@ -387,20 +385,10 @@ srchost	cmdhelper.h	/^    ::cmdhelper::ipArray srchost;$/;"	m	struct:cmdhelper::
 start_tasks	utils.cpp	/^int start_tasks()$/;"	f
 start_time	cmconfig.h	/^	time_t		start_time; \/\/when it began run$/;"	m	struct:__anon3
 start_time	cmconfig.h	/^	time_t	start_time;	\/\/when it start to runing..$/;"	m	struct:__anon2
-stat_server_addr	cmconfig.h	/^	unsigned int	stat_server_addr;	\/\/ address of stat server$/;"	m	struct:_task_t
-stat_server_port	cmconfig.h	/^	unsigned short 	stat_server_port;	\/\/ port of stat server	$/;"	m	struct:_task_t
-status	cmconfig.h	/^	unsigned int 	status; 		\/\/status of this task node$/;"	m	struct:_task_t
-status	cmconfig.h	/^enum status $/;"	g
-status_over	cmconfig.h	/^	status_over = 3$/;"	e	enum:status
-status_ready	cmconfig.h	/^	status_ready = 1,$/;"	e	enum:status
-status_working	cmconfig.h	/^	status_working = 2,$/;"	e	enum:status
 stmode	cmdhelper.h	/^    ::Ice::Long stmode;$/;"	m	struct:cmdhelper::msghead
 strcasecmp	IniHelper.h	/^static int strcasecmp(const char *s1, const char *s2)$/;"	f
 strncasecmp	IniHelper.h	/^static int strncasecmp(const char *s1, const char *s2, size_t n)$/;"	f
 syslog_msg	syslog_utils.cpp	/^int syslog_msg(const char * szMsg,...)$/;"	f
-task_list_t	cmconfig.h	/^}task_list_t;$/;"	t	typeref:struct:__anon7
-task_t	cmconfig.h	/^}task_t;$/;"	t	typeref:struct:_task_t
-taskid	cmconfig.h	/^	unsigned int	taskid;$/;"	m	struct:_task_t
 taskid	cmdhelper.h	/^    ::Ice::Int taskid;$/;"	m	struct:cmdhelper::msghead
 tasknum	cmconfig.h	/^	unsigned short	tasknum;		\/\/how many tasks are running$/;"	m	struct:__anon6
 th_num	cmconfig.h	/^	int	  th_num;\/\/thread number$/;"	m	struct:__anon4
@@ -413,13 +401,12 @@ tid	cmconfig.h	/^	pthread_t 	tid; \/\/thread id or task id$/;"	m	struct:__anon3
 time_out	cmconfig.h	/^	unsigned int	time_out;		\/\/added @2011-05-18$/;"	m	struct:__anon6
 timestamp	cmdhelper.h	/^    ::Ice::Long timestamp;$/;"	m	struct:cmdhelper::msghead
 title	IniHelper.h	/^	char title[SEC_TITLE];$/;"	m	struct:section
-total_time_out	cmconfig.h	/^	unsigned int  	total_time_out; 	\/\/total time out for this task$/;"	m	struct:_task_t
 tt	os_independent.h	/^static int tt = 1;$/;"	v
 type	cmdhelper.h	/^    ::Ice::Int type;$/;"	m	struct:cmdhelper::magicmsg
 uid	cmdhelper.h	/^    ::Ice::Int uid;$/;"	m	struct:cmdhelper::msghead
 upCast	cmdhelper.cpp	/^::Ice::Object* IceInternal::upCast(::cmdhelper::CmdMessageHandler* p) { return p; }$/;"	f	class:IceInternal
 upCast	cmdhelper.cpp	/^::IceProxy::Ice::Object* IceInternal::upCast(::IceProxy::cmdhelper::CmdMessageHandler* p) { return p; }$/;"	f	class:IceInternal
-user	cmconfig.h	/^	char 	user[64];$/;"	m	struct:__anon8
+user	cmconfig.h	/^	char 	user[64];$/;"	m	struct:__anon7
 username	cmconfig.h	/^	char 		username[USER_NAME];$/;"	m	struct:__anon6
 username	cmdhelper.h	/^    ::std::string username;$/;"	m	struct:cmdhelper::msghead
 var_entry	IniHelper.h	/^struct var_entry$/;"	s

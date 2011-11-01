@@ -176,6 +176,14 @@ cmdhelper::msghead::operator==(const msghead& __rhs) const
     {
         return false;
     }
+    if(remotefile != __rhs.remotefile)
+    {
+        return false;
+    }
+    if(localfile != __rhs.localfile)
+    {
+        return false;
+    }
     return true;
 }
 
@@ -346,6 +354,22 @@ cmdhelper::msghead::operator<(const msghead& __rhs) const
     {
         return false;
     }
+    if(remotefile < __rhs.remotefile)
+    {
+        return true;
+    }
+    else if(__rhs.remotefile < remotefile)
+    {
+        return false;
+    }
+    if(localfile < __rhs.localfile)
+    {
+        return true;
+    }
+    else if(__rhs.localfile < localfile)
+    {
+        return false;
+    }
     return false;
 }
 
@@ -379,6 +403,8 @@ cmdhelper::msghead::__write(::IceInternal::BasicStream* __os) const
     __os->write(gid);
     __os->write(username);
     __os->write(login);
+    __os->write(remotefile);
+    __os->write(localfile);
 }
 
 void
@@ -404,6 +430,8 @@ cmdhelper::msghead::__read(::IceInternal::BasicStream* __is)
     __is->read(gid);
     __is->read(username);
     __is->read(login);
+    __is->read(remotefile);
+    __is->read(localfile);
 }
 
 bool

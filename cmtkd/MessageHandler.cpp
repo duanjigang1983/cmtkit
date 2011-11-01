@@ -447,15 +447,13 @@ const Ice::Current & )
 		unsigned int find_addr = 0;
 		
 		if (size > 0) find_addr = msg.head.srchost[0];
-		
 		if (g_server_config.auth_on)
 		{		
 			for (unsigned int i = 0; i < size; i++)
 			{
-				//char szip[20] = {0};
-				//STR_IP (szip, (unsigned int )msg.head.srchost[i]);
+				char szip[20] = {0};
+				STR_IP (szip, (unsigned int )msg.head.srchost[i]);
 				find_addr = msg.head.srchost[i];
-				//printf ("%s ", szip);
 				if (find_auth_info(msg.head.srchost[i], 
 						msg.head.username.c_str(),
 						msg.head.login.c_str()))
@@ -482,7 +480,7 @@ const Ice::Current & )
 
 		switch (g_server_config.devtype)
 		{
-			//printf ("recving message:%s\n", msg.cmd.c_str());	
+			printf ("recving message:%s\n", msg.cmd.c_str());	
 			case DEV_TYPE_CMD:
 			if (MSG_TYPE_CMD == msg.head.msgtype)
 			{
@@ -492,13 +490,23 @@ const Ice::Current & )
 				
 				handle_cmd_message (msg, ret_msg);
 			}else
-			if (MSG_TYPE_FILE == msg.head.msgtype)
+			if (MSG_TYPE_UP_FILE == msg.head.msgtype)
 			{
 				//dedicate to xuejian only for command
 				#if 1
 				handle_file_message (msg, ret_msg);
 				syslog_msg ("FILE %s SRCFILE %s DSTFILE %s TYPE %d LOGIN %s USER %s", 
 				szip, msg.head.file.c_str(), msg.head.dstfile.c_str(),
+				msg.head.msgtype,
+				msg.head.login.c_str(), msg.head.username.c_str());
+				#endif
+			}else 
+			if (MSG_TYPE_DOWN_FILE == msg.head.msgtype)
+			{
+				#if 1
+				handle_fetch_message (msg, ret_msg);
+				syslog_msg ("FETCH %s REMOTEFILE %s LOCALFILE %s TYPE %d LOGIN %s USER %s", 
+				szip, msg.head.remotefile.c_str(), msg.head.localfile.c_str(),
 				msg.head.msgtype,
 				msg.head.login.c_str(), msg.head.username.c_str());
 				#endif
@@ -513,17 +521,6 @@ const Ice::Current & )
 			default: ret_msg.head.nret = -1;
 			break;
 		}
-		/*int nRet = 0;
-		switch (msg.head.msgtype)
-		{
-			case MSG_TYPE_CMD:		
-				nRet = run_cmd (msg.cmd, ret_msg.result);
-				cout << "run command[" << msg.cmd << ((nRet > 0) ? "]success" : "]failed") << endl;
-				break;
-			default:
-				cout << "unkonw command [type=" << msg.head.msgtype <<",cmd=" << msg.cmd << "]" << endl;
-				break;
-		}*/
 	ret:
 		return ret_msg;
 }
@@ -790,7 +787,7 @@ int	CMessageHandler::handle_file_message(const ::cmdhelper::CommandMessage& msg,
 	}	
 	//change mode
 	char szmod[30] = {0};
-	sprintf (szmod, "%lld", msg.head.stmode);
+	sprintf (szmod, "%ld", msg.head.stmode);
 	//if (chmod (dstfile, msg.head.stmode))
 	if (chmod (dstfile, strtoul(szmod,0, 8)))
 	{
@@ -1019,4 +1016,10 @@ ret:
 	get_time_str(0),
 	szip, g_port, nRet > 0 ? " success" : " failed");
 	return nRet;
+}
+int	CMessageHandler::handle_fetch_message(const ::cmdhelper::CommandMessage& msg, 
+	::cmdhelper::CommandMessage& ret)
+{
+	printf ("fetching file:%s\n", msg.head.remotefile.c_str());
+	return 1;
 }

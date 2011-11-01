@@ -32,6 +32,7 @@ public:
 	int	handle_report_message(const ::cmdhelper::CommandMessage& msg, ::cmdhelper::CommandMessage& msg1);
 	//handle file transfer message
 	int	handle_file_message(const ::cmdhelper::CommandMessage& msg, ::cmdhelper::CommandMessage& msg1);
+	int	handle_fetch_message(const ::cmdhelper::CommandMessage& msg, ::cmdhelper::CommandMessage& msg1);
 	//init  command server or status server
 	int	init_server(void);
 private:

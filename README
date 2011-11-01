@@ -1,4 +1,5 @@
 @history:
+	2011-11-01:adding the function of fetching a file from remote host for cmtkit
 	2011-10-29:update time and add version for cmtk/cmtki
 
 created by duanjigang1983<duanjigang1983@gmail.com> for cmtk at 2011-09-19

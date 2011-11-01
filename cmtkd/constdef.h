@@ -2,7 +2,8 @@
 #define _CONST_DEF_H_
 #define MSG_TYPE_STAT 1
 #define MSG_TYPE_CMD 2
-#define MSG_TYPE_FILE 3
+#define MSG_TYPE_UP_FILE 3
+#define MSG_TYPE_DOWN_FILE 4
 #define PROXY_LEN 128
 
 

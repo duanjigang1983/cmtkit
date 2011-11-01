@@ -112,8 +112,11 @@ bool find_auth_info (unsigned int addr, const char* szuser, const char* szlogin)
 		return true;
 	}
 	//hash node empty	
-	if (NULL == g_auth_list[ch]) return false;	
-	
+	if (NULL == g_auth_list[ch])
+	{
+		//printf("hash null:%s-%u-%s\n", szuser, addr, szlogin);
+		 return false;	
+	}
 	///
 	auth_t * pa = g_auth_list[ch];
 	bool find = false;
@@ -127,8 +130,11 @@ bool find_auth_info (unsigned int addr, const char* szuser, const char* szlogin)
 		pa = pa->next;
 	}
 	
-	if (NULL == pa) return false;
-	
+	if (NULL == pa)
+	{
+		//printf ("can not find:%s-%u\n", szuser, addr);
+		 return false;
+	}
 	for (unsigned int index = 0; index < pa->ipnum; index++)
 	{
 		if (pa->iplist[index] == addr) return true;
