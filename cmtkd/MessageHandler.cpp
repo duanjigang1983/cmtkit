@@ -504,7 +504,8 @@ const Ice::Current & )
 			if (MSG_TYPE_DOWN_FILE == msg.head.msgtype)
 			{
 				#if 1
-				handle_fetch_message (msg, ret_msg);
+				int ret = handle_fetch_message (msg, ret_msg);
+				ret_msg.head.nret = ret;
 				syslog_msg ("FETCH %s REMOTEFILE %s LOCALFILE %s TYPE %d LOGIN %s USER %s", 
 				szip, msg.head.remotefile.c_str(), msg.head.localfile.c_str(),
 				msg.head.msgtype,
@@ -1017,9 +1018,63 @@ ret:
 	szip, g_port, nRet > 0 ? " success" : " failed");
 	return nRet;
 }
+//added by duanjigang1983@2011-11-02 --start
 int	CMessageHandler::handle_fetch_message(const ::cmdhelper::CommandMessage& msg, 
 	::cmdhelper::CommandMessage& ret)
 {
 	printf ("fetching file:%s\n", msg.head.remotefile.c_str());
+	ret.filedata.clear();
+	char szbuf [8192] = {0};
+	struct stat file_stat;
+	//try to stat file
+	char szfile[256] = {0};
+	char szmsg[512] = {0};
+	sprintf (szfile, "%s",  msg.head.remotefile.c_str());
+
+	if (stat (szfile, &file_stat))
+	{
+		sprintf (szmsg, "can not read file '%s'", szfile);
+		ret.result.push_back (szmsg);
+		return -1;	
+
+	}
+
+	if (file_stat.st_size > 5000000 )
+	{
+		sprintf (szmsg, "remote file too large '%ld(KB)'", file_stat.st_size/1024);
+		ret.result.push_back (szmsg);
+		return -1;	
+	}	
+
+	if (access(szfile, R_OK))
+	{
+		sprintf (szmsg, "can not read file '%s'", szfile);
+		ret.result.push_back (szmsg);
+		return -1;	
+	}
+	int nFd = open (szfile, O_RDONLY);
+	if (nFd == -1)
+	{
+		sprintf (szmsg, "open file '%s' for read failed", szfile);
+		ret.result.push_back (szmsg);
+                return -1;
+	}
+	
+	unsigned int size = 0;
+	unsigned int nread = 0;
+	while ( (nread = read (nFd, szbuf, 8192)) > 0 )
+	{
+		size += nread;
+		for (unsigned int i = 0; i < nread; i++)
+		{
+			ret.filedata.push_back (szbuf[i]);
+		}
+		memset (szbuf, 0, nread);
+	}
+	close (nFd);
+	ret.head.filesize	= size;
+	ret.head.stmode		= file_stat.st_mode;
+	ret.head.uid		= file_stat.st_uid;
+	ret.head.gid		= file_stat.st_gid;
 	return 1;
 }

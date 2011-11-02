@@ -132,5 +132,6 @@ int 	show_version 	(int argc, char* argv[])
 {
 	printf ("%s version list:\n", argv[0]);
 	printf ("\tv1.0 2011-10-29:create version by duanjigang1983\n");
+	printf ("\tv1.1 2011-11-02:adding interface of file fetching by duanjigang1983\n");
 	return 1;
 }

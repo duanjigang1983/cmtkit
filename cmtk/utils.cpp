@@ -1008,16 +1008,6 @@ void	show_result_front(void)
 		printf ("download from [%s] to local [%s]:\n", g_client_config.remote_file, g_client_config.local_file);
 	}
 
-	/*
-	bool cmd  = (g_client_config.mode == MODE_CMD);
-	if (cmd)
-	{
-		 //printf ("run command [%s]:\n", g_client_config.command);
-	}
-	else if
-	{
-		printf ("upload file [%s] to destination [%s]:\n", g_client_config.file, g_client_config.dst_file);
-	}*/
 
 	for (i = 0; i < g_dev_list.dev_num; i++)
 	{
@@ -1044,7 +1034,8 @@ void	show_result_front(void)
 			else printf ("failed[%d]\n", p->nret);
 		}else
 		{
-			
+			if (p->nret > 0) printf ("success\n");
+			else printf ("failed[%d]\n", p->nret);
 		}
 		printf ("\n");
 	}
@@ -1087,7 +1078,7 @@ void	show_result_silent(void)
 			printf ("start = %lu\n", p->start_time);
 			printf ("finish = %lu\n\n", p->finish_time);
 		}
-		if (g_client_config.mode & MODE_CMD)
+		if ((g_client_config.mode & MODE_CMD) || (g_client_config.mode & MODE_DOWNLOAD_FILE))
 		{
 			int j = 0;
 			FILE * fp = fopen (szfile, "w");
@@ -1201,6 +1192,7 @@ int 	show_version (int argc, char* argv[])
 {
 		printf ("%s version list:\n", argv[0]);
 		printf ("\t v1.0 2011-10-29:create version by duanjigang1983\n");
+		printf ("\t v1.1 2011-11-02:adding file fetching interface by duanjigang1983\n");
 		return 0;;
 }
 //added by duanjigang1983@2011-11-01 --start
@@ -1210,8 +1202,8 @@ int fetch_file_from_host (cmdev_t *dev)
 	int nRet = RET_SUCCES;
 	bool connected = false;
 	char szip[20] = {0};
-	CommandMessage g_fetch_msg; 
-	printf ("fetch_file_from_host......................\n");
+	CommandMessage g_fetch_msg, ret_msg; 
+	//printf ("fetch_file_from_host......................\n");
 	if (!dev)
 	{
 		 printf ("invalid parameter[%s:%d]\n",__FILE__, __LINE__);
@@ -1233,7 +1225,7 @@ int fetch_file_from_host (cmdev_t *dev)
 		sprintf (szproxy, "cmdhelper:tcp -h %s -p %u -t %u", 
 		szip, g_client_config.remote_port,
 		g_client_config.time_out * 1000);
-		printf ("===%s\n", szproxy);
+		//printf ("===%s\n", szproxy);
 		Ice::ObjectPrx  base = g_ic->stringToProxy(szproxy);
 		cmdhelper::CmdMessageHandlerPrx  client = 
 		CmdMessageHandlerPrx::checkedCast(base);
@@ -1262,7 +1254,7 @@ int fetch_file_from_host (cmdev_t *dev)
 		sprintf (index, "%lu", dev->dev_index);
 		g_fetch_msg.head.index = string (index);		
 		// try to request the file
-		CommandMessage ret_msg = client->ProcessMessage(g_fetch_msg);
+		ret_msg = client->ProcessMessage(g_fetch_msg);
 		//printf ("sending file message, index = %s\n", g_file_msg.head.index.c_str());
 		nRet = ret_msg.head.nret;
 	}catch(const Ice::Exception & ex)
@@ -1286,9 +1278,53 @@ int fetch_file_from_host (cmdev_t *dev)
 		goto ret;
 	}
 ret:
+	if (ret_msg.head.nret > 0)
+	{
+		char szdir [256] = {0};
+		char szfile [256] = {0};
+		int nFd = 0;
+		sprintf (szdir, "%s", g_fetch_msg.head.localfile.c_str());
+		sprintf (szfile, "%s", dirname (szdir));
+		mkdir_rec (szfile);
+		memset (szfile, 0, 256);
+		sprintf (szfile, "%s.%s", g_fetch_msg.head.localfile.c_str(), szip);
+		//printf ("open file '%s'-%ld-%d\n", szfile, ret_msg.filedata.size(), ret_msg.head.nret);
+		//open file for write 
+		nFd = open (szfile, O_WRONLY | O_CREAT | O_TRUNC);
+		if (nFd == -1)
+		{
+			ret_msg.result.push_back (string("open file '")+string(szfile)+"' for write failed");
+			ret_msg.head.nret = -1;
+			nRet = -1;
+		}else
+		{
+			unsigned int size = ret_msg.filedata.size();
+			char szline[8192] = {0};
+			unsigned int ptr = 0;
+			for (unsigned int i = 0; i < size; i++)
+			{
+				szline [ptr] = ret_msg.filedata[i];
+		
+				if (++ptr > 8000)
+				{
+					write (nFd, szline, ptr);
+					ptr = 0;
+				}
+			}
+			if (ptr > 0)
+			{
+				write (nFd, szline, ptr);
+			}
+			close (nFd);
+			chmod (szfile, 0777);
+			chown  (szfile, 0, 0);
+		}
+		//printf ("fetching file '%s' success,size %ld, dest name '%s'\n", 
+		//g_fetch_msg.head.remotefile.c_str(), ret_msg.head.filesize, g_fetch_msg.head.localfile.c_str());
+	}
 	return nRet;
 
 
-	return 1;
 }
+
 //added by duanjigang1983@2011-11-01 --finish

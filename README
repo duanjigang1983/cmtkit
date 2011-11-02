@@ -1,4 +1,5 @@
 @history:
+	2011-11-02:finishing the function of fetching a file from remote host for cmtkit
 	2011-11-01:adding the function of fetching a file from remote host for cmtkit
 	2011-10-29:update time and add version for cmtk/cmtki
 
