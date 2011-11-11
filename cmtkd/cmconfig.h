@@ -15,6 +15,8 @@
 #include <string>
 #include "NetHelper.h"
 
+#include "cm_plugin.h"
+
 #include <stdarg.h>
 #include "cmdhelper.h"
 #ifdef __LINUX__
@@ -27,6 +29,7 @@ using namespace cmdhelper;
 //define struct of configuration for cmserver
 typedef struct
 {
+	char		plugin_dir [PLUGIN_DIR];
 	unsigned short 	port;
 	unsigned short 	daemon;
 	unsigned short 	mode; // 1 for popen 2 for system

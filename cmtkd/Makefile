@@ -1,9 +1,9 @@
 #CFLAG=-c -Wall  -I/usr/local/include  -ftemplate-depth-128 -I./ -D__LINUX__ -g
 CFLAG=-c -Wall -I./ -D__LINUX__ -g -I/usr/local/Ice-3.3.1/include
-SERVER_OBJS=MessageHandler.o cmdhelper.o cmutils.o syslog_utils.o IniHelper.o NetHelper.o cm_utils.o host_tree.o
-CLI_OBJS=cmdhelper.o utils.o NetHelper.o syslog_utils.o  cm_utils.o
+SERVER_OBJS=MessageHandler.o cmdhelper.o cmutils.o syslog_utils.o IniHelper.o NetHelper.o cm_utils.o host_tree.o cm_plugin.o
 DFLAG=-lIce -lIceUtil -lpthread -L/usr/local/Ice-3.3.1/lib
 CC=c++
+OBJS=cmtkd
 default:
 	$(CC) $(CFLAG)   cmtkd.cpp
 	$(CC) $(CFLAG)   cmutils.cpp
@@ -14,6 +14,7 @@ default:
 	$(CC) $(CFLAG)   NetHelper.cpp
 	$(CC) $(CFLAG)   IniHelper.cpp
 	$(CC) $(CFLAG)   cm_utils.cpp
+	$(CC) $(CFLAG)   cm_plugin.cpp
 	$(CC) -o cmtkd  cmtkd.o $(SERVER_OBJS) $(DFLAG)    
 clean:
 	rm *.o cmtkd

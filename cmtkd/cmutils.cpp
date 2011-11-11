@@ -10,6 +10,7 @@ extern cm_server_config_t g_server_config;
 
 int	parse_options (int argc, char* argv[])
 {
+	struct stat st;
 	memset (&g_server_config, 0, sizeof(g_server_config));
 	g_server_config.port = DFT_PORT;
 	g_server_config.daemon = DFT_DM;
@@ -25,7 +26,7 @@ int	parse_options (int argc, char* argv[])
      	char ec;
 	int error = 0;
        
-	while ((c = getopt (argc, argv, "p:dsat:T:i:hv")) != -1)
+	while ((c = getopt (argc, argv, "p:dsat:T:i:hvf:")) != -1)
 	{
          	switch (c)
            	{
@@ -45,6 +46,18 @@ int	parse_options (int argc, char* argv[])
 				{
 					g_server_config.interval = 60;
 				}
+			//plugin dir
+			case 'f': //adding plugin by duanjigang@2011-11-11
+				if (strlen(optarg) > sizeof(g_server_config.plugin_dir))
+				{
+					printf ("plugin_dir too long (%u>%u)\n", strlen(optarg), PLUGIN_DIR);
+					error = 1;
+					break;
+				}else
+				{
+					strncpy (g_server_config.plugin_dir, optarg, strlen(optarg));
+				}
+				break;
 			//daemon flag
            		case 'd':
 				g_server_config.daemon = 1;
@@ -124,6 +137,18 @@ int	parse_options (int argc, char* argv[])
 		//printf ("cmserver config: port = %u, thread number = %d, run with system:%s\n",
 		//	g_server_config.port, g_server_config.threadnum, g_server_config.mode ? "yes":"no");
 	}
+	//adding by duanjigang@2011-11-11 --start
+	if (stat (g_server_config.plugin_dir, &st))
+	{
+		printf ("can not stat plugin dir:%s\n", g_server_config.plugin_dir);
+		return 0;
+	}
+	if ((st.st_mode & S_IFMT) != S_IFDIR)
+	{
+		printf ("plugin dir '%s' is not a directory\n", g_server_config.plugin_dir);
+		return 0;
+	}
+	//adding by duanjigang@2011-11-11 --finish
 	g_server_config.auth_on = atoi (get_conf("cmtools/general/auth", "1"));
 	return 1;
 }
