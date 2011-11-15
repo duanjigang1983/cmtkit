@@ -55,7 +55,10 @@ int	parse_options (int argc, char* argv[])
 					break;
 				}else
 				{
+					char * p = g_server_config.plugin_dir + strlen(optarg) - 1;
 					strncpy (g_server_config.plugin_dir, optarg, strlen(optarg));
+					while ((*p == '/') && (p != g_server_config.plugin_dir))
+					*p-- = '\0';
 				}
 				break;
 			//daemon flag

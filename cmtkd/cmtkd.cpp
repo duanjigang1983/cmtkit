@@ -37,6 +37,7 @@ int t_main(int argc, char* argv[])
 		//parse program options from its parameter	
 		setuid(0);
 		init_syslog ();
+		load_plugin (g_server_config.plugin_dir);//added by duanjigang@2011-11-13
 		/*if ( parse_options (argc, argv) <= 0 )
 		{
 			return 0;

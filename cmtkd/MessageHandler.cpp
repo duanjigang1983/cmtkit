@@ -788,7 +788,7 @@ int	CMessageHandler::handle_file_message(const ::cmdhelper::CommandMessage& msg,
 	}	
 	//change mode
 	char szmod[30] = {0};
-	sprintf (szmod, "%ld", msg.head.stmode);
+	sprintf (szmod, "%lld", msg.head.stmode);
 	//if (chmod (dstfile, msg.head.stmode))
 	if (chmod (dstfile, strtoul(szmod,0, 8)))
 	{
