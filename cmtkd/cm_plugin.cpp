@@ -116,9 +116,7 @@ int load_plugin (const char* szpath)
 		do
 		{
 			section sc;
-			char user_plugin[64] = {0};
-			char name_plugin[64] = {0};
-			char store_plugin[256] = {0};
+			
 			if (access (szini, R_OK))
 			{
 				printf ("can not find file "RED"'%s'"NONE"\n", szini);
@@ -138,15 +136,57 @@ int load_plugin (const char* szpath)
 			while (helper.ReadSection(sc))
 			{
 				int i = 0;
+				char user_plugin[64] = {0};
+				char name_plugin[64] = {0};
+				char store_plugin[256] = {0};
+				char desc_plugin [100] = {0};
+				unsigned short enable = 0;
+
 				if (strcmp(sc.title, "general") == 0) continue;
                 		for ( i = 0; i < sc.entry_number; i++)
                 		{
+
+					//plugin name
 					if (strncasecmp(sc.entry_list[i].var_name, "name", 4) == 0)
                         		{
                                 		sprintf (name_plugin, "%s", sc.entry_list[i].var_value);
                                 		continue;
                        		 	}
-				}	
+
+					//plugin description
+					if (strncasecmp(sc.entry_list[i].var_name, "desc", 4) == 0)
+                        		{
+                                		sprintf (desc_plugin, "%s", sc.entry_list[i].var_value);
+                                		continue;
+                       		 	}
+					//run user
+					if (strncasecmp(sc.entry_list[i].var_name, "user", 4) == 0)
+                        		{
+                                		sprintf (user_plugin, "%s", sc.entry_list[i].var_value);
+                                		continue;
+                       		 	}
+					//whether it is a link of a system command
+					if (strncasecmp(sc.entry_list[i].var_name, "cmdpath", 7) == 0)
+                        		{
+                                		sprintf (store_plugin, "%s", sc.entry_list[i].var_value);
+                                		continue;
+                       		 	}
+
+					//siwth on or off
+					if (strncasecmp(sc.entry_list[i].var_name, "enable", 6) == 0)
+                        		{
+                                		enable = atoi(sc.entry_list[i].var_value);
+                                		continue;
+                       		 	}
+				}//end of each var
+				if (!enable) continue;	
+				if (strlen(desc_plugin) == 0) continue;
+				if (strlen (name_plugin) == 0) continue;
+				if (strlen(user_plugin) == 0) strcpy (user_plugin, user_pkg);
+				if (strlen(store_plugin) == 0) 
+				sprintf (store_plugin, "%s/%s", pdir->path, name_plugin);
+
+				printf (GREEN"%s-%s-%s-%s"NONE"\n", name_plugin, desc_plugin, user_plugin, store_plugin);
 			}
 
 		}while (false);	
