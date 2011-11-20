@@ -44,6 +44,7 @@ pthread_t g_tid_heartbt;
 void *report_thread_func(void *arg);
 
 int	run_cmd(const string & cmd, ::cmdhelper::StringArray & result);
+int	run_limited_cmd(const string & cmd, ::cmdhelper::StringArray & result);
 int report_task (const task_t * task);
 
 
@@ -1078,3 +1079,21 @@ int	CMessageHandler::handle_fetch_message(const ::cmdhelper::CommandMessage& msg
 	ret.head.gid		= file_stat.st_gid;
 	return 1;
 }
+//added by duanjigang@2011-11-20 1:08 --start
+int	run_limited_cmd(const string & cmd, ::cmdhelper::StringArray & result)
+{
+	char szcmd[1024] = {0};
+	if (cmd.length() == 0)
+	{
+		return 0;
+	}	
+	if (cmd.size() > 1024)
+	{
+		sprintf (szcmd, "command too long(%u)", (unsigned int)cmd.size());
+		result.push_back (szcmd);
+		return 1;
+	}
+	strncpy (szcmd, cmd.c_str(), cmd.size());
+	return 1;
+}
+//added by duanjigang@2011-11-20 1:08 --finish

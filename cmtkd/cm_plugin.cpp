@@ -1,15 +1,19 @@
 #include "cm_plugin.h"
+#include "cmconfig.h"
 #include "IniHelper.h"
 #include <sys/types.h>
 #include <dirent.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <libgen.h>
 #include <unistd.h>
 #include <string.h>
 #include "ColorDefine.h"
 
 static cm_plugin_pkg_t * plist = NULL ;
+static cm_plugin_t * g_find_plugin = NULL;
 
+extern cm_server_config_t g_server_config;
 static void free_plist (void)
 {
 	cm_plugin_pkg_t * p = plist;
@@ -141,7 +145,7 @@ int load_plugin (const char* szpath)
 				char store_plugin[256] = {0};
 				char desc_plugin [100] = {0};
 				unsigned short enable = 0;
-
+				cm_plugin_t * np = NULL;
 				if (strcmp(sc.title, "general") == 0) continue;
                 		for ( i = 0; i < sc.entry_number; i++)
                 		{
@@ -185,8 +189,51 @@ int load_plugin (const char* szpath)
 				if (strlen(user_plugin) == 0) strcpy (user_plugin, user_pkg);
 				if (strlen(store_plugin) == 0) 
 				sprintf (store_plugin, "%s/%s", pdir->path, name_plugin);
+				
+				np = (cm_plugin_t *) malloc (sizeof(cm_plugin_t));
+				if (!np)
+				{
+					printf ("%s-%d:malloc(sizeof(cm_plugin_t))failed\n", __FILE__, __LINE__);
+					continue;
+				}
+				memset (np, 0, sizeof(cm_plugin_t));
+				np->store = (char*)malloc(sizeof(char)*strlen(store_plugin)+1);
+				if (!np->store)
+				{
+					printf ("%s-%d:malloc(cm_plugin_t->store)failed\n", __FILE__, __LINE__);
+					free (np);
+					continue;
 
-				printf (GREEN"%s-%s-%s-%s"NONE"\n", name_plugin, desc_plugin, user_plugin, store_plugin);
+				}
+				np->next = NULL;
+				memset (np->store, 0, sizeof(char)*strlen(store_plugin)+1);
+				strncpy (np->store, store_plugin, strlen(store_plugin));	
+				unsigned int len = strlen (name_plugin);
+				if (len >= sizeof(np->name))
+				len = sizeof(np->name);
+				
+				strncpy (np->name, name_plugin, len);
+				len = strlen (desc_plugin);
+				if (len >= sizeof(np->desc));
+				len = sizeof(np->desc);
+				strncpy (np->desc, desc_plugin, len);
+
+				len = strlen (user_plugin);
+				if (len >= sizeof(np->user))
+				len  = sizeof(np->user);
+				strncpy (np->user, user_plugin, len);
+
+				if (!pdir->plist)
+				{
+					pdir->plist = np; 
+					pdir->pnum = 1;
+				}else
+				{
+					np->next = pdir->plist;
+					pdir->plist = np;
+					pdir->pnum++;
+				}
+				//printf (GREEN"%s-%s-%s-%s"NONE"\n", name_plugin, desc_plugin, user_plugin, store_plugin);
 			}
 
 		}while (false);	
@@ -195,3 +242,70 @@ int load_plugin (const char* szpath)
 	return 1;
 }
 
+void show_plist (void)
+{
+	cm_plugin_pkg_t * pdir = plist;
+	while (pdir)
+	{
+		do
+		{
+			cm_plugin_t * pp = pdir->plist;
+			if (pdir->pnum == 0) break;
+			printf ("%s:\n", pdir->path);
+			while (pp)
+			{
+				do
+				{
+					printf ("name:"GREEN"%s"NONE",desc:"GREEN"%s"NONE",user:"GREEN"%s"NONE",store:"GREEN"%s"NONE"\n",
+					pp->name, pp->desc, pp->user, pp->store);
+				}while (false);
+				pp = pp->next;
+			}
+			
+		}while (false);
+		pdir = pdir->next;	
+	}	
+}
+int  search_cmd (const char* szcmd)
+{
+	int nRet = -1;
+	char szbuf[1024] = {0};
+	char szdir[1024] = {0};	
+	char * end = 0;
+	unsigned int plen = strlen(g_server_config.plugin_dir);
+	g_find_plugin = NULL;
+	strcpy (szbuf, szcmd);
+	char * pdir = dirname (szbuf);
+	if (!pdir) return -1;
+	strcpy (szdir, pdir);
+	memset (szbuf, 0, 1024);
+	strcpy (szbuf, szcmd);
+	end = szbuf + strlen(szdir);
+	while (end && !isspace(*end)) end++;
+	if (!end) end = szbuf + strlen(szbuf);
+	cm_plugin_pkg_t * pkg = plist;
+	while (pkg)
+	{
+		do
+		{
+			const char* pstart = pkg->path + plen;
+			cm_plugin_t * pp = pkg->plist;
+			if (strcmp(pstart, szdir)) break;
+			while(pp)
+			{
+				do
+				{
+					end = '\0';
+					const char * name = pstart + strlen(szdir)+1;
+					if (strcmp(name, pp->name))break;			
+					g_find_plugin = pp; return 1;		
+				}while (false);
+				pp = pp->next;
+			}
+		}while (false);
+		pkg = pkg->next;
+	}
+
+	
+	return nRet;
+}
