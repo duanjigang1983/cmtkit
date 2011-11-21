@@ -26,5 +26,6 @@ typedef struct _cm_plugin_pkg_t
 
 extern int  load_plugin (const char* szpath);
 extern void show_plist (void);
-extern int  search_cmd (const char* szcmd);
+extern void adjust_path (void);
+extern int  run_limit_cmd (const char* szline, const char* szfile);
 #endif

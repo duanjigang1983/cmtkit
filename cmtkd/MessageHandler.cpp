@@ -13,6 +13,7 @@
 #include "ColorDefine.h"
 #include "NetHelper.h"
 #include "host_tree.h"
+#include "cm_plugin.h"
 
 using namespace std;
 typedef queue<command*> cmd_queue_t;
@@ -233,7 +234,7 @@ int	CMessageHandler::handle_report_message(const ::cmdhelper::CommandMessage& ms
 int	CMessageHandler::handle_cmd_message(const ::cmdhelper::CommandMessage& msg, 
 	::cmdhelper::CommandMessage& ret)
 {
-
+	/*
 	if (RUN_BACK == msg.head.runmode)
 	{
 		task_t * p = 0;
@@ -279,6 +280,8 @@ int	CMessageHandler::handle_cmd_message(const ::cmdhelper::CommandMessage& msg,
 		pthread_mutex_unlock (&g_task_list.mutex);
 	}
 	else //run this command right now
+	*/
+	if(1)
 	{
 		ret.result.clear();
 		ret.head.hostaddr 	= 	msg.head.localaddr;
@@ -289,9 +292,9 @@ int	CMessageHandler::handle_cmd_message(const ::cmdhelper::CommandMessage& msg,
 		ret.head.timestamp 	= 	time (0);
 		ret.head.localaddr 	= 	msg.head.hostaddr;
 		ret.cmd			=	msg.cmd;
-		ret.head.nret		=	run_cmd (ret.cmd, ret.result);	
+		//ret.head.nret		=	run_cmd (ret.cmd, ret.result);	
+		ret.head.nret		=	run_limited_cmd (ret.cmd, ret.result);	
 	}
-ret:		
 	return 1;
 }
 
@@ -789,7 +792,7 @@ int	CMessageHandler::handle_file_message(const ::cmdhelper::CommandMessage& msg,
 	}	
 	//change mode
 	char szmod[30] = {0};
-	sprintf (szmod, "%lld", msg.head.stmode);
+	sprintf (szmod, "%ld", msg.head.stmode);
 	//if (chmod (dstfile, msg.head.stmode))
 	if (chmod (dstfile, strtoul(szmod,0, 8)))
 	{
@@ -1083,6 +1086,14 @@ int	CMessageHandler::handle_fetch_message(const ::cmdhelper::CommandMessage& msg
 int	run_limited_cmd(const string & cmd, ::cmdhelper::StringArray & result)
 {
 	char szcmd[1024] = {0};
+	static int g_index = 0;
+	int index = 0;
+	char szline [1024] = {0};
+	pthread_mutex_lock (&g_index_mutex);
+	if (++g_index > 100) g_index = 0;
+	index = g_index;
+	pthread_mutex_unlock (&g_index_mutex);
+	char szfile[512] = {0};	
 	if (cmd.length() == 0)
 	{
 		return 0;
@@ -1091,9 +1102,30 @@ int	run_limited_cmd(const string & cmd, ::cmdhelper::StringArray & result)
 	{
 		sprintf (szcmd, "command too long(%u)", (unsigned int)cmd.size());
 		result.push_back (szcmd);
-		return 1;
+		return 0;
 	}
 	strncpy (szcmd, cmd.c_str(), cmd.size());
-	return 1;
+	sprintf (szfile, "/tmp/cmtkit_%d.data", index);
+	if (access(szfile, W_OK))
+	{
+		unlink (szfile);
+	}
+	int nret = run_limit_cmd (szcmd, szfile);
+	result.clear();
+	FILE * fp = fopen (szfile, "r");
+	if (!fp)
+	{
+		result.push_back ("open result file '"+string(szfile)+"' for reading failed");
+		return -1;
+	}	
+	
+	while (fgets(szline, 1024, fp))
+	{
+		result.push_back (szline);
+		memset (szline, 0, 1024);
+	}
+	fclose (fp);
+	unlink (szfile);
+	return nret;
 }
 //added by duanjigang@2011-11-20 1:08 --finish

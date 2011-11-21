@@ -50,7 +50,7 @@ int	parse_options (int argc, char* argv[])
 			case 'f': //adding plugin by duanjigang@2011-11-11
 				if (strlen(optarg) > sizeof(g_server_config.plugin_dir))
 				{
-					printf ("plugin_dir too long (%u>%u)\n", strlen(optarg), PLUGIN_DIR);
+					printf ("plugin_dir too long (%u>%u)\n", (unsigned int)strlen(optarg), PLUGIN_DIR);
 					error = 1;
 					break;
 				}else

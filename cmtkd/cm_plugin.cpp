@@ -2,6 +2,7 @@
 #include "cmconfig.h"
 #include "IniHelper.h"
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <dirent.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -11,8 +12,10 @@
 #include "ColorDefine.h"
 
 static cm_plugin_pkg_t * plist = NULL ;
-static cm_plugin_t * g_find_plugin = NULL;
 
+void free_makeargv(char **argv);
+int32_t get_userid (const char* name, uid_t * uid);
+int32_t makeargv(const char *s, char ***argvp);
 extern cm_server_config_t g_server_config;
 static void free_plist (void)
 {
@@ -242,6 +245,23 @@ int load_plugin (const char* szpath)
 	return 1;
 }
 
+void adjust_path (void)
+{
+	cm_plugin_pkg_t * pdir = plist;
+	while (pdir)
+	{
+		do
+		{
+			char szline[1024] = {0};
+			sprintf (szline, pdir->path);
+			memset (pdir->path, 0, sizeof(pdir->path));
+			if (strlen(szline) > strlen(g_server_config.plugin_dir))
+			strcpy (pdir->path, szline + strlen(g_server_config.plugin_dir)+1);
+			
+		}while(false);
+		pdir = pdir->next;
+	}
+}
 void show_plist (void)
 {
 	cm_plugin_pkg_t * pdir = plist;
@@ -251,7 +271,7 @@ void show_plist (void)
 		{
 			cm_plugin_t * pp = pdir->plist;
 			if (pdir->pnum == 0) break;
-			printf ("%s:\n", pdir->path);
+			printf ("[%s]:\n", pdir->path);
 			while (pp)
 			{
 				do
@@ -266,46 +286,283 @@ void show_plist (void)
 		pdir = pdir->next;	
 	}	
 }
-int  search_cmd (const char* szcmd)
+int  run_limit_cmd (const char* szline, const char* szfile)
 {
-	int nRet = -1;
+	cm_plugin_pkg_t * pdir = plist;
+	cm_plugin_t * prun = NULL;
+	unsigned int len = 0;
+	unsigned char find = 0;
 	char szbuf[1024] = {0};
-	char szdir[1024] = {0};	
-	char * end = 0;
-	unsigned int plen = strlen(g_server_config.plugin_dir);
-	g_find_plugin = NULL;
-	strcpy (szbuf, szcmd);
-	char * pdir = dirname (szbuf);
-	if (!pdir) return -1;
-	strcpy (szdir, pdir);
-	memset (szbuf, 0, 1024);
-	strcpy (szbuf, szcmd);
-	end = szbuf + strlen(szdir);
-	while (end && !isspace(*end)) end++;
-	if (!end) end = szbuf + strlen(szbuf);
-	cm_plugin_pkg_t * pkg = plist;
-	while (pkg)
+	char szdir[512] = {0};
+	char szname[256] = {0};
+	if (!szline) return 0;
+	strcpy (szbuf, szline);
+	len = strlen (szbuf);
+	unsigned int dir_len = 0;
+	char * tmpdir = dirname (szbuf);
+	if (tmpdir)
+	{
+		strcpy (szdir, tmpdir);
+		if (szdir[0] == '.') memset(szdir, 0, sizeof(szdir));
+	}
+	
+	dir_len = strlen (szdir);
+	memset (szbuf, 0, sizeof(szbuf));
+	strcpy (szbuf, szline);
+	char * pstart = szbuf + strlen(szdir);
+	if (*pstart == '/') pstart++;
+	char * finish = pstart;
+	unsigned char loop = 1;
+	while (finish && !isspace(*finish))finish++;
+	
+	while (pdir && loop)
 	{
 		do
 		{
-			const char* pstart = pkg->path + plen;
-			cm_plugin_t * pp = pkg->plist;
-			if (strcmp(pstart, szdir)) break;
-			while(pp)
+			if (dir_len != strlen(pdir->path))break;
+			cm_plugin_t * pp = pdir->plist;
+			while (pp && loop)
 			{
 				do
 				{
-					end = '\0';
-					const char * name = pstart + strlen(szdir)+1;
-					if (strcmp(name, pp->name))break;			
-					g_find_plugin = pp; return 1;		
+					if (strlen(pp->name) != (unsigned int)(finish - pstart)) break;
+					if (strncmp(pp->name, pstart, (unsigned int)(finish - pstart))) break;
+					find = 1;
+					prun = pp;
+					loop = 0;
+					break;					
 				}while (false);
 				pp = pp->next;
-			}
+			}											
+			
 		}while (false);
-		pkg = pkg->next;
+		pdir = pdir->next;
 	}
+	//find plugin
+	if (prun)
+	{
+		uid_t uid = 0;
+		strcpy (szname, prun->store);
+		if( get_userid (prun->user, &uid) <= 0)
+        	{
+                	printf ("get user id of '%s' failed\n", prun->user);
+                	return -1;
+        	}
+		int pid = fork();
+		if (!pid)
+		{
+			const char * p = pstart;
+			char  name[128] = {0};
+			char ** argv_list = NULL;
+			char ** argvs = NULL;
+			int32_t ntok = 0;
+			int32_t i = 0;
+			int32_t size = 0;
 
-	
-	return nRet;
+			int nFd =  open (szfile, O_CREAT|O_RDWR, 0644);	
+			if (nFd == -1)
+			{
+				fprintf (stderr, "open file '%s' for writing failed\n", szfile);
+				exit (0);
+			}
+			dup2(nFd, 2);
+			dup2(nFd, 1);
+
+			//char* envp[]  = {"env", NULL};
+			if (setuid(uid))
+			{
+				printf ("setuid(%u) failed\n", uid);
+				exit (0);
+			}
+			while (!isspace(*p) && *p)
+			{
+				p++;
+			}	
+			//dup2 (1, 2);
+			sprintf (name, "%s", basename(szbuf));
+			if (*p)
+			{	
+				ntok = makeargv (p, &argv_list);
+				/*for (i = 0; i < ntok; i++)
+				{
+					printf ("token[%d]=%s\n", i, argv_list[i]);
+				}*/
+			}else  ntok = 0;
+
+			if (ntok < 0 )
+			{
+				printf ("error parameter:[%s]\n", p);
+				exit (0);
+			}
+			size = (ntok > 0) ? ntok : 0; 
+			argvs  = (char**)malloc (sizeof(char*)*(size + 2));
+			if (!argvs)
+			{
+				printf ("malloc failed\n");
+				exit (0);
+			}
+			memset (argvs, 0, sizeof(char*)*(size + 2));
+			argvs[0] = name;
+		
+			for (i = 0; i < size; i++)	
+			argvs [i + 1] = argv_list [i];
+		
+			argvs [size + 1] = NULL;
+
+			memset (szbuf, 0, sizeof(szbuf));
+			//if (execvp(szname, argvs) < 0)
+			if (access (szname, X_OK))
+			{
+				perror("");
+				exit (0);
+			}
+			
+			if (execvp(szname,  argvs) < 0)
+			{
+				perror("Error on execv:");
+			}
+			//close (fd[1]);
+			close (nFd);
+			free(argvs);
+			if (ntok >= 0)
+			free_makeargv (argv_list);
+			exit(0);
+		}else
+		{
+			wait (NULL);
+		}
+	}
+	return 1;
 }
+int32_t makeargv(const char *s, char ***argvp)
+{
+        const char *snew;
+        const char *pch;
+        size_t size;
+        char *t;
+        char *pnext;
+        char quote = 0;
+        int32_t numtokens;
+        int32_t i;
+
+        if ((s == NULL) || (argvp == NULL))
+        {
+		//printf ("%s-%d\n", __FILE__, __LINE__);
+                errno = EINVAL;
+                return -1;
+        }
+
+        /* snew is real start of the string, tricky? */
+        snew = s + strspn(s, " \t");
+        size = strlen(snew) + 1;
+
+        if ((t = (char*)malloc(size)) == NULL)
+	{
+		//printf ("%s-%d\n", __FILE__, __LINE__);
+                return -1;
+	}
+	for (pch = s, pnext = t, numtokens = 1; *pch; pch++)
+        {
+                switch (*pch) 
+		{
+                	case '\\':
+                        	++pch;
+                        	if (*pch == '\0') break;
+                        		switch (*pch) 
+					{
+                                		default:
+                                		*pnext++ = *pch;
+                                		break;
+                                        }
+                         	break;
+                	case '"':
+                	case '\'':
+                        	quote = quote ? '\0' : *pch;
+                        	break;
+                        case ' ':
+                        case '\t':
+                        
+				if (quote) 
+				{	
+					*pnext++ = *pch;
+         			} else
+				{
+          				// skip continuing white-space 
+          				if (pnext > t && *(pnext - 1) != '\0') 
+					{
+            					*pnext++ = '\0';
+            					++numtokens;
+          				}
+        			}
+        		break;
+      			default:
+        			*pnext++ = *pch;
+        		break;
+    		}
+  	}
+
+	if (quote) 
+	{
+		
+		//printf ("%s-%d\n", __FILE__, __LINE__);
+    		return -1;
+  	}
+
+  	// create argument array for ptrs to the tokens 
+  	if ((*argvp = (char**)malloc((numtokens + 1) * sizeof(char *))) == NULL) 
+	{
+   		int error = errno;
+    		free(t);
+    		errno = error;
+		//printf ("%s-%d\n", __FILE__, __LINE__);
+    		return -1;
+  	}
+
+  	
+	for (i = 0, pnext = t; i < numtokens; i++, pnext = pnext + strlen(pnext) + 1)
+    	{
+		*((*argvp) + i) = pnext;
+  	}
+	*((*argvp) + numtokens) = NULL;
+
+  	return numtokens;
+}
+void free_makeargv(char **argv) 
+{
+        if (argv)
+        {
+                if (*argv != NULL)
+                free(*argv);
+                free(argv);
+        }
+}
+
+int32_t get_userid (const char* name, uid_t * uid)
+{
+	char szline[1024] = {0};
+	u_int8_t find = 0;
+	FILE * fp = fopen ("/etc/passwd", "r");
+	if (!fp) return -1;
+	
+	while (fgets (szline ,1024, fp))
+	{
+		char fname[128] = {0},szuid[10] = {0};
+		char * p1, * p2, *p3;
+
+		p1 = strchr (szline, ':');
+		if (!p1)continue;
+		p2 = strchr (p1+1, ':');
+		if (!p2)continue;
+		p3 = strchr (p2+1, ':');
+		if (!p3) continue;
+		strncpy (fname, szline, p1-szline);
+		if (strcmp(name, fname)) continue;
+		strncpy(szuid, p2 + 1, p3-p2-1);
+		//printf ("===%s-%d\n", uid, strlen(uid));
+		*uid = atoi(szuid);
+		find  = 1;
+		break;	
+	}
+	return find ? 1:-1;
+}
+
