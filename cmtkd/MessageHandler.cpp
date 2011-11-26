@@ -16,9 +16,6 @@
 #include "cm_plugin.h"
 
 using namespace std;
-typedef queue<command*> cmd_queue_t;
-cmd_queue_t g_cmd_queue;
-pthread_mutex_t  g_cmd_queue_mutex;
 pthread_mutex_t  g_index_mutex;
 unsigned int 	 g_index_cmd = 0;
 
@@ -26,27 +23,11 @@ extern int syslog_msg(const char * szMsg,...);
 //global configure for server
 cm_server_config_t g_server_config;
 extern int interval;
-//task queue for server
-task_list_t g_task_list;
-
-//task node pool
-task_list_t g_task_pool;
-
-//over task queue for report
-task_list_t g_over_task_list;
-//define for work thread
-pthread_t * g_tid_work = 0;
-void *work_thread_func(void *arg);
 extern int GetNetip (unsigned int *);
-//define for report thread
-pthread_t g_tid_report;
-pthread_t g_tid_update;
 pthread_t g_tid_heartbt;
-void *report_thread_func(void *arg);
 
-int	run_cmd(const string & cmd, ::cmdhelper::StringArray & result);
-int	run_limited_cmd(const string & cmd, ::cmdhelper::StringArray & result);
-int report_task (const task_t * task);
+int	run_cmd(const string & cmd, ::cmtkp::StringArray & result);
+int	run_limited_cmd(const string & cmd, ::cmtkp::StringArray & result);
 
 
 extern Ice::CommunicatorPtr g_ic;
@@ -58,108 +39,14 @@ CMessageHandler::~CMessageHandler()
 {
 
 }
-static char* get_time_str(time_t * tm)
-{
-	struct tm * newtime;
-	static char s[32]= {0};
- 	if(tm == NULL)
-	{
-		time_t ct;
-        	time(&ct);
-        	newtime = gmtime(&ct);
-	}else
-	{
-		newtime = gmtime(tm);
-	}
-	sprintf( s,"%04d-%02d-%02d %02d:%02d:%02d", 
-	newtime->tm_year + 1900, 
-				(newtime->tm_mon + 1)%12, 
-				newtime->tm_mday,
-         		(newtime->tm_hour + 8)%24, 
-				newtime->tm_min, newtime->tm_sec );
-		return s;
-}
-///////////////function to update client////////////////////
 
-int do_notify_task (void);
 
-/////////////////////////////////////
-
-void *update_thread_func(void *arg);
+//void *update_thread_func(void *arg);
 void *heartbt_thread_func(void *arg);
+
 int	CMessageHandler::init_cmd_server (void)
 {
 	int nRet = 1;
-	//init task queue
-	pthread_mutex_init (&g_task_list.mutex, 0);
-	g_task_list.list = NULL;
-
-	//init task pool
-	pthread_mutex_init (&g_task_pool.mutex, 0);
-	g_task_pool.list = NULL;
-
-	//init over task list
-	pthread_mutex_init (&g_over_task_list.mutex, 0);
-	g_over_task_list.list = NULL;
-
-	//init mutex for index 	
-	pthread_mutex_init (&g_index_mutex, 0);
-	//malloc resource for task pool
-	for (unsigned int i = 0; i < TASK_POOL_SIZE; i++)
-	{
-		task_t * pt = new task_t;
-		if (!pt)
-		{
-			printf ("malloc new task_t failed\n");
-			nRet = -1;
-			goto ret;	
-		}
-		pt->next = NULL;
-		
-		if (NULL == g_task_pool.list)
-		{
-			g_task_pool.list = pt;
-		}else
-		{
-			pt->next = g_task_pool.list;
-			g_task_pool.list = pt;
-		}
-		nRet++;
-		
-	}
-
-	//init report thread
-	if (pthread_create (&g_tid_report, 0, report_thread_func, NULL))
-	{
-		printf ("create report thread failed\n");
-		nRet = -2;
-		goto ret;
-	}	
-	
-		
-	//init work thread
-	g_tid_work = new pthread_t[g_server_config.threadnum];
-	if (!g_tid_work)
-	{
-		printf ("new pthread_t failed\n");
-		nRet = -1;
-		pthread_cancel (g_tid_report);
-		goto ret;
-
-	}
-	unsigned int index [1000];
-	for (unsigned int i = 0; i < g_server_config.threadnum; i++)
-	{
-		index[i] = i;
-		if (pthread_create (&g_tid_work[i], 0, work_thread_func, &index[i]))
-		{
-			printf ("create work thread failed\n");
-			nRet = -3;
-			pthread_cancel (g_tid_report);
-			goto ret;
-		}
-	}	
-ret:
 	return nRet;
 }
 
@@ -187,21 +74,6 @@ int	CMessageHandler::init_server(void)
 	mkdir_rec(INFO_DIR);
 	init_auth_info();	
 
-	//create update thread
-	if (g_server_config.active)
-	{
-		pthread_mutex_init (&g_cmd_queue_mutex, 0);
-		if (pthread_create (&g_tid_update, 0, update_thread_func, NULL))
-		{
-			printf ("create update thread failed\n");
-			return -1;
-		}else
-		{
-			printf ("create update thread succsss\n");
-		}	
-	}
-	
-	//create heart beat thread
 	if (pthread_create (&g_tid_heartbt, 0, heartbt_thread_func, NULL))
 	{
 		printf ("create heart beat thread failed\n");
@@ -210,96 +82,31 @@ int	CMessageHandler::init_server(void)
 	{
 		printf ("create heartbeat thread succsss\n");
 	}	
-	//printf ("init %s server\n", (g_server_config.devtype == DEV_TYPE_STAT) ? "stat" : "command");	
-	return (DEV_TYPE_STAT ==  g_server_config.devtype) ? init_stat_server():init_cmd_server();
+	return init_cmd_server();
 }
 
-int	CMessageHandler::handle_report_message(const ::cmdhelper::CommandMessage& msg, 
-	::cmdhelper::CommandMessage& ret)
+
+
+int	CMessageHandler::handle_cmd_message(const ::cmtkp::CommandMessage& msg, 
+	::cmtkp::CommandMessage& ret)
 {
-	char szip[20] = {0};
-	unsigned int i = 0;
-	unsigned int addr = (unsigned int)msg.head.hostaddr;
-	STR_IP (szip, addr);
-	printf ("%s\n", szip);
-	printf ("%s\n", msg.cmd.c_str());
-	for ( i = 0; i < msg.result.size(); i++)
-	{
-		printf ("%s", msg.result[i].c_str());
-	}
-	return 1;
-}
-
-//command handling thread
-int	CMessageHandler::handle_cmd_message(const ::cmdhelper::CommandMessage& msg, 
-	::cmdhelper::CommandMessage& ret)
-{
-	/*
-	if (RUN_BACK == msg.head.runmode)
-	{
-		task_t * p = 0;
-		pthread_mutex_lock (&g_task_pool.mutex);
-		//there are too many tasks for this server	
-		if (NULL == g_task_pool.list)
-		{
-			ret.result.push_back ("too many task for this server");
-			pthread_mutex_unlock (&g_task_pool.mutex);
-			goto ret;
-		}
-		p = g_task_pool.list;
-		//moving head to next pointer
-		g_task_pool.list = p->next;
-		pthread_mutex_unlock (&g_task_pool.mutex);
-
-		p->status = status_ready;
-		p->born_time = time(0);
-		p->heart_time_out = 10;
-		p->total_time_out = 120;
-		p->result = 0;
-		p->stat_server_addr 	= msg.head.hostaddr; //stat server addr
-		p->taskid		= msg.head.taskid; //cmclient child task pid
-		p->cmdid		= msg.head.commandid; //command id
-		p->stat_server_port 	= msg.head.hostport; //stat server port
-		p->local_addr		= msg.head.localaddr;//ip addr of self
-		p->cmd_ret.clear();
-		p->cmd_data = msg.cmd;
-
-		//add this task to task queue
-		pthread_mutex_lock (&g_task_list.mutex);
-		p->next = NULL;
-		if (NULL == g_task_list.list)
-		{
-			printf ("adding node at head\n");
-			g_task_list.list = p;
-		}else
-		{
-			printf ("adding node at tail\n");
-			p->next = g_task_list.list;
-			g_task_list.list = p;
-		}
-		pthread_mutex_unlock (&g_task_list.mutex);
-	}
-	else //run this command right now
-	*/
-	if(1)
-	{
-		ret.result.clear();
-		ret.head.hostaddr 	= 	msg.head.localaddr;
-		ret.head.hostport 	= 	2011;
-		ret.head.commandid 	= 	msg.head.commandid;
-		ret.head.taskid 	= 	msg.head.taskid;
-                ret.head.msgtype 	= 	msg.head.msgtype;
-		ret.head.timestamp 	= 	time (0);
-		ret.head.localaddr 	= 	msg.head.hostaddr;
-		ret.cmd			=	msg.cmd;
-		//ret.head.nret		=	run_cmd (ret.cmd, ret.result);	
-		ret.head.nret		=	run_limited_cmd (ret.cmd, ret.result);	
-	}
+	ret.result.clear();
+	ret.head.hostaddr 	= 	msg.head.localaddr;
+	ret.head.hostport 	= 	2011;
+	ret.head.commandid 	= 	msg.head.commandid;
+	ret.head.taskid 	= 	msg.head.taskid;
+        ret.head.msgtype 	= 	msg.head.msgtype;
+	ret.head.timestamp 	= 	time (0);
+	ret.head.localaddr 	= 	msg.head.hostaddr;
+	ret.cmd			=	msg.cmd;
+	ret.head.nret		=	
+					g_server_config.limited ? 
+					run_limited_cmd (ret.cmd, ret.result):run_cmd (ret.cmd, ret.result);	
 	return 1;
 }
 
 
-int	run_cmd(const string & cmd, ::cmdhelper::StringArray & result)
+int	run_cmd(const string & cmd, ::cmtkp::StringArray & result)
 {
 	//printf ("get one command:%s\n", cmd.c_str());
 	if (cmd.length() == 0)
@@ -327,6 +134,7 @@ int	run_cmd(const string & cmd, ::cmdhelper::StringArray & result)
 	FILE * f1 = fopen (szshell, "w");
 	if (!f1)
 	{
+		syslog_msg ("%s-%d:open file '%s' for writing failed\n",__FILE__, __LINE__, szshell); 
 		result.push_back ("run command exception(create temp shell file failed)");
 		return 1;
 	}
@@ -358,6 +166,7 @@ int	run_cmd(const string & cmd, ::cmdhelper::StringArray & result)
 	FILE * fp = fopen (szfile, "r");
 	if (fp == NULL)
 	{
+		syslog_msg ("open file '%s' for reading failed\n",szfile); 
 		result.push_back ("run command exception(create temp data file failed)");
 		return 1;
 	}
@@ -372,74 +181,22 @@ int	run_cmd(const string & cmd, ::cmdhelper::StringArray & result)
 }
 
 //handle config update message
-int	CMessageHandler::handle_conf_message (const ::cmdhelper::command& cmd)
+int	CMessageHandler::handle_conf_message (const ::cmtkp::command& cmd)
 {
 	return 1;
 }
 
-int CMessageHandler::ProcessMagicMessage(const ::cmdhelper::magicmsg& msg, const Ice::Current &)
+int CMessageHandler::ProcessMagicMessage(const ::cmtkp::magicmsg& msg, const Ice::Current &)
 {
 	printf ("magic message type:%d\n", msg.type);
 	return 1;
 }
 
-::cmdhelper::response  CMessageHandler::ProcessNotify(const ::cmdhelper::command& cmd, const Ice::Current &)
-{
-	::cmdhelper::response  res;
-	char szip[20] = {0};
-	unsigned int addr = (unsigned int) cmd.clientaddr;
-	STR_IP (szip, addr);
-	printf ("ProcessNotify for client %s\n", szip);
-	return res;	
-}
 //handle message
-::cmdhelper::command CMessageHandler::ProcessCmd(const ::cmdhelper::command& cmd, const Ice::Current &)
-{
-	::cmdhelper::command ret;
-	::cmdhelper::command * new_cmd = 0;
-	
-	switch (cmd.cmdtype)
-	{
-		//notify this client to fetch task(s)
-		case CMD_TYPE_NOTIFY:
-		{
-			new_cmd = new ::cmdhelper::command;
-			//copy data
-			new_cmd->host 		= cmd.host; //reply server
-			new_cmd->port 		= cmd.port; //reply port
-			new_cmd->cmdtype 	= cmd.cmdtype; //command type
-			new_cmd->cmdid 		= cmd.cmdid; //command id
-			new_cmd->pid		= cmd.pid; //process id
-			new_cmd->clientaddr	= cmd.clientaddr; //client addr
-			new_cmd->clientid	= cmd.clientid; //client id 
-			unsigned size 		= cmd.data.size(); //data size
-			new_cmd->data.clear();
-			for (unsigned int i = 0; i < size; i++)
-			{
-				new_cmd->data.push_back (cmd.data[i]);
-			}
-			pthread_mutex_lock (&g_cmd_queue_mutex);
-			g_cmd_queue.push (new_cmd);	
-			printf ("pushing one command to queue ("GREEN"%u"NONE")\n", (unsigned int)g_cmd_queue.size());
-			pthread_mutex_unlock (&g_cmd_queue_mutex);
-			break;
-		}
-		//update conf message
-		case CMD_TYPE_CONF:
-		{
-			break;
-		}
-		default:
-		printf ("[%s:%d] error command type :%d\n", __FILE__, __LINE__, cmd.cmdtype);
-		break;
-	}
-	
-	return ret;
-}
-::cmdhelper::CommandMessage CMessageHandler::ProcessMessage(const ::cmdhelper::CommandMessage& msg, 
+::cmtkp::CommandMessage CMessageHandler::ProcessMessage(const ::cmtkp::CommandMessage& msg, 
 const Ice::Current & )
 {
-		::cmdhelper::CommandMessage ret_msg;
+		::cmtkp::CommandMessage ret_msg;
 		#if 0	
 		printf ("message type: %s\n", str_msg_type[MSG_TYPE_CMD%4]);
 		#endif
@@ -482,236 +239,45 @@ const Ice::Current & )
 		
 		STR_IP(szip, find_addr);
 
-		switch (g_server_config.devtype)
-		{
-			printf ("recving message:%s\n", msg.cmd.c_str());	
-			case DEV_TYPE_CMD:
-			if (MSG_TYPE_CMD == msg.head.msgtype)
-			{
-				syslog_msg ("COMMAND %s accept [%s] %d LOGIN %s USER %s", 
-				szip, msg.cmd.c_str(), msg.head.msgtype,
-				msg.head.login.c_str(), msg.head.username.c_str());
-				
-				handle_cmd_message (msg, ret_msg);
-			}else
-			if (MSG_TYPE_UP_FILE == msg.head.msgtype)
-			{
-				//dedicate to xuejian only for command
-				#if 1
-				handle_file_message (msg, ret_msg);
-				syslog_msg ("FILE %s SRCFILE %s DSTFILE %s TYPE %d LOGIN %s USER %s", 
-				szip, msg.head.file.c_str(), msg.head.dstfile.c_str(),
-				msg.head.msgtype,
-				msg.head.login.c_str(), msg.head.username.c_str());
-				#endif
-			}else 
-			if (MSG_TYPE_DOWN_FILE == msg.head.msgtype)
-			{
-				#if 1
-				int ret = handle_fetch_message (msg, ret_msg);
-				ret_msg.head.nret = ret;
-				syslog_msg ("FETCH %s REMOTEFILE %s LOCALFILE %s TYPE %d LOGIN %s USER %s", 
-				szip, msg.head.remotefile.c_str(), msg.head.localfile.c_str(),
-				msg.head.msgtype,
-				msg.head.login.c_str(), msg.head.username.c_str());
-				#endif
-			}else
-			{
-				ret_msg.head.nret = -1;
-			}
-			break;
-			case DEV_TYPE_STAT:
-			handle_report_message (msg, ret_msg);
-			break;
-			default: ret_msg.head.nret = -1;
-			break;
-		}
+		
+	printf ("recving message:%s\n", msg.cmd.c_str());	
+	if (MSG_TYPE_CMD == msg.head.msgtype)
+	{
+		syslog_msg ("COMMAND %s accept [%s] %d LOGIN %s USER %s", 
+		szip, msg.cmd.c_str(), msg.head.msgtype, msg.head.login.c_str(), msg.head.username.c_str());
+		handle_cmd_message (msg, ret_msg);
+	}else
+	if (MSG_TYPE_UP_FILE == msg.head.msgtype)
+	{
+		//dedicate to xuejian only for command
+		#if 1
+		handle_file_message (msg, ret_msg);
+		syslog_msg ("FILE %s SRCFILE %s DSTFILE %s TYPE %d LOGIN %s USER %s", 
+		szip, msg.head.file.c_str(), msg.head.dstfile.c_str(),
+		msg.head.msgtype, msg.head.login.c_str(), msg.head.username.c_str());
+		#endif
+	}else 
+	if (MSG_TYPE_DOWN_FILE == msg.head.msgtype)
+	{
+		#if 1
+		int ret = handle_fetch_message (msg, ret_msg);
+		ret_msg.head.nret = ret;
+		syslog_msg ("FETCH %s REMOTEFILE %s LOCALFILE %s TYPE %d LOGIN %s USER %s", 
+		szip, msg.head.remotefile.c_str(), msg.head.localfile.c_str(), msg.head.msgtype,
+		msg.head.login.c_str(), msg.head.username.c_str());
+		#endif
+	}else
+	{
+		ret_msg.head.nret = -1;
+	}
 	ret:
-		return ret_msg;
+	return ret_msg;
 }
 
-//work thread
-void *work_thread_func(void *arg)
-{
-	//unsigned int * index = (unsigned int*)arg;
 
-	//printf ("working thread %u running\n", *index);
-	pthread_detach(pthread_self());
-	
-	while (1)
-	{
-		task_t * task = NULL;
-		
-		pthread_mutex_lock (&g_task_list.mutex);
-		
-		if (NULL != g_task_list.list)
-		{
-			//printf ("task not null %p\n", g_task_list.list);
-			task = g_task_list.list;
-			g_task_list.list = g_task_list.list->next;
-		}
-		pthread_mutex_unlock (&g_task_list.mutex);
-		
-		if (NULL == task)
-		{
-			usleep (10);
-			continue;
-		}
-		task->status = status_working;
-		task->run_time = time(0);
-		//run command
-		task->result = run_cmd (task->cmd_data, task->cmd_ret);
-		task->over_time = time (0);
-		task->status = status_over;
-		task->next =  NULL;
-		
-		//push over task to over task list
-		pthread_mutex_lock (&g_over_task_list.mutex);
-		//printf ("thread %u finishing task[%s]\n", *index, task->cmd_data.c_str());
-		
-		if (NULL == g_over_task_list.list) 	
-		{
-			g_over_task_list.list = task;
-		}else
-		{
-			task->next = g_over_task_list.list;
-			g_over_task_list.list = task;
-		}
-		pthread_mutex_unlock (&g_over_task_list.mutex);
-	}
-	pthread_exit(0);
-	return 0;
-}
 
-//report thread
-void *report_thread_func(void *arg)
-{
-	pthread_detach(pthread_self());
-		
-	while (1)
-	{
-		task_t * task = NULL;
-		pthread_mutex_lock (&g_over_task_list.mutex);
-		if (NULL != g_over_task_list.list)
-		{
-			task = g_over_task_list.list;
-			g_over_task_list.list = g_over_task_list.list->next;
-			task->next = NULL;
-		}	
-		pthread_mutex_unlock (&g_over_task_list.mutex);
-
-		if (NULL == task)
-		{
-			usleep (10);
-			continue;
-		}
-		
-		printf ("task %p reporting result for command[%s]result=", 
-			task, task->cmd_data.c_str());
-		if (task->cmd_data.size() == 0)
-		{
-			printf ("error data\n");
-			//exit(0);
-		}
-		for (unsigned int i = 0; i < task->cmd_ret.size(); i++)
-		{
-			printf ("%s", task->cmd_ret[i].c_str());
-		}
-		//printf ("\n");
-		//report------------start
-		if (report_task (task) <= 0)
-		{
-			//printf ("");
-		}		
-		//report------------finish
-
-		//release task node
-		pthread_mutex_lock (&g_task_pool.mutex);
-		task->cmd_data = "";
-		task->cmd_ret.clear();
-		task->next = NULL;
-
-		if (NULL == g_task_pool.list)
-		{
-			g_task_pool.list = task;
-		}else
-		{
-			task->next = g_task_pool.list;
-			g_task_pool.list = task;
-		}	
-		pthread_mutex_unlock (&g_task_pool.mutex);
-		//sleep (1);
-	}
-	pthread_exit(0);
-	return 0;
-
-}
-//report this task to stat server
-int report_task (const task_t * task)
-{
-	CommandMessage msg;
-	int nRet = 1;
-	unsigned int i = 0;
-	char szip[20] = {0};
-	if (task->stat_server_addr == 0)
-	{
-		printf ("invalid task addr\n");
-		return 1;
-	}
-	STR_IP (szip, task->stat_server_addr);
-
-	try{
-		char szproxy [PROXY_LEN] = {0}; // what we use to identify a connection
-                sprintf (szproxy, "cmdhelper:tcp -h %s -p %u -t 1000", szip, task->stat_server_port);
-                //sprintf (szproxy, "cmdhelper:tcp -h 10.10.10.128 -p %u -t 1000",  123);
-                Ice::ObjectPrx  base = g_ic->stringToProxy(szproxy);
-                cmdhelper::CmdMessageHandlerPrx  client = 
-                CmdMessageHandlerPrx::checkedCast(base);
-                if(!client)
-                {   
-                        //throw "invalud proxy:ComPlusBasePrx::checkedCast(base)";
-                        nRet = -1;
-                        goto ret;
-                }   
-		msg.head.hostaddr 	= 	task->local_addr;
-		msg.head.hostport 	= 	2011;
-		msg.head.commandid 	= 	task->cmdid;
-		msg.head.taskid 	= 	task->taskid;
-                msg.head.msgtype 	= 	MSG_TYPE_STAT;
-		msg.head.timestamp 	= 	time (0);
-		msg.head.localaddr 	= 	inet_addr (szip);
-		
-		//copying command
-		msg.cmd = task->cmd_data;
-		msg.result.clear();
-		//coying result
-		for ( i = 0; i < task->cmd_ret.size(); i++)
-               	{
-			msg.result.push_back (task->cmd_ret[i]);			
-		}
-
-		CommandMessage ret_msg = client->ProcessMessage(msg);
-	}catch(const Ice::Exception & ex)
-        {
-                //cerr << ex << endl;
-                nRet = -2;
-                goto ret;
-        }catch(const char* msg)
-        {
-                //cerr << msg << endl;
-                nRet = -3;
-                goto ret;
-        }
-ret:
-	if (nRet < 0)
-	{
-		printf ("sending result to stat server %s:%u failed\n", szip, task->stat_server_port);
-	}
-	return nRet;
-}
-
-int	CMessageHandler::handle_file_message(const ::cmdhelper::CommandMessage& msg, 
-	::cmdhelper::CommandMessage& ret)
+int	CMessageHandler::handle_file_message(const ::cmtkp::CommandMessage& msg, 
+	::cmtkp::CommandMessage& ret)
 {
 	printf ("CMessageHandler::handle_file_message %s\n", msg.head.index.c_str());
 	char file[512] = {0};
@@ -792,7 +358,7 @@ int	CMessageHandler::handle_file_message(const ::cmdhelper::CommandMessage& msg,
 	}	
 	//change mode
 	char szmod[30] = {0};
-	sprintf (szmod, "%ld", msg.head.stmode);
+	sprintf (szmod, "%lld", msg.head.stmode);
 	//if (chmod (dstfile, msg.head.stmode))
 	if (chmod (dstfile, strtoul(szmod,0, 8)))
 	{
@@ -935,6 +501,7 @@ void *heartbt_thread_func(void *arg)
 	}
 	pthread_exit(0);
 }
+/*
 void *update_thread_func(void *arg)
 {
 	//printf ("%ld update thread start running\n", (long int)time(0));
@@ -942,7 +509,7 @@ void *update_thread_func(void *arg)
 	{
 		int sleep_interval = 5;
 		
-		::cmdhelper::command * pcmd = 0;	
+		::cmtkp::command * pcmd = 0;	
 		pthread_mutex_lock (&g_cmd_queue_mutex);
 		if (g_cmd_queue.size() > 0)
 		{
@@ -984,8 +551,8 @@ int do_notify_task (void)
 {
 	char szip[20] = {0};
 	int nRet = 1;
-	::cmdhelper::response res;
-	::cmdhelper::command cmd;
+	::cmtkp::response res;
+	::cmtkp::command cmd;
 	cmd.clientaddr = g_myaddr;
 	STR_IP (szip, g_host);
 
@@ -993,9 +560,9 @@ int do_notify_task (void)
 	{
 		char szproxy [PROXY_LEN] = {0}; // what we use to identify a connection
 
-		sprintf (szproxy, "cmdhelper:tcp -h %s -p %u -t 2000", szip, g_port);
+		sprintf (szproxy, "cmtkp:tcp -h %s -p %u -t 2000", szip, g_port);
 		Ice::ObjectPrx  base = g_ic->stringToProxy(szproxy);
-		cmdhelper::CmdMessageHandlerPrx  client = 
+		cmtkp::CmdMessageHandlerPrx  client = 
 		CmdMessageHandlerPrx::checkedCast(base);
                 if(!client)
                 {
@@ -1022,9 +589,10 @@ ret:
 	szip, g_port, nRet > 0 ? " success" : " failed");
 	return nRet;
 }
+*/
 //added by duanjigang1983@2011-11-02 --start
-int	CMessageHandler::handle_fetch_message(const ::cmdhelper::CommandMessage& msg, 
-	::cmdhelper::CommandMessage& ret)
+int	CMessageHandler::handle_fetch_message(const ::cmtkp::CommandMessage& msg, 
+	::cmtkp::CommandMessage& ret)
 {
 	printf ("fetching file:%s\n", msg.head.remotefile.c_str());
 	ret.filedata.clear();
@@ -1083,28 +651,37 @@ int	CMessageHandler::handle_fetch_message(const ::cmdhelper::CommandMessage& msg
 	return 1;
 }
 //added by duanjigang@2011-11-20 1:08 --start
-int	run_limited_cmd(const string & cmd, ::cmdhelper::StringArray & result)
+int	run_limited_cmd(const string & cmd, ::cmtkp::StringArray & result)
 {
 	char szcmd[1024] = {0};
 	static int g_index = 0;
+	char* tail = 0;
 	int index = 0;
 	char szline [1024] = {0};
 	pthread_mutex_lock (&g_index_mutex);
 	if (++g_index > 100) g_index = 0;
 	index = g_index;
 	pthread_mutex_unlock (&g_index_mutex);
+	
 	char szfile[512] = {0};	
+
+	printf ("%s-%d:run limited cmd:%s\n", __FILE__, __LINE__, cmd.c_str());
+	
 	if (cmd.length() == 0)
 	{
+		printf ("EXIT:%s-%d\n", __FILE__,__LINE__);
+		result.push_back ("empty command to run");
 		return 0;
 	}	
 	if (cmd.size() > 1024)
 	{
+		printf ("EXIT:%s-%d\n", __FILE__,__LINE__);
 		sprintf (szcmd, "command too long(%u)", (unsigned int)cmd.size());
 		result.push_back (szcmd);
 		return 0;
 	}
 	strncpy (szcmd, cmd.c_str(), cmd.size());
+	tail = szcmd + (cmd.size() - 2);
 	sprintf (szfile, "/tmp/cmtkit_%d.data", index);
 	if (access(szfile, W_OK))
 	{
@@ -1112,9 +689,15 @@ int	run_limited_cmd(const string & cmd, ::cmdhelper::StringArray & result)
 	}
 	int nret = run_limit_cmd (szcmd, szfile);
 	result.clear();
+	if (nret <= 0)
+	{
+		result.push_back (string("can not find command:'") + szcmd + string("'"));
+		return -1;
+	}
 	FILE * fp = fopen (szfile, "r");
 	if (!fp)
 	{
+		printf ("EXIT:%s-%d\n", __FILE__,__LINE__);
 		result.push_back ("open result file '"+string(szfile)+"' for reading failed");
 		return -1;
 	}	

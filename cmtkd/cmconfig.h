@@ -5,8 +5,6 @@
 #define DFT_DM   0
 #define DFT_MODE 1
 #define DFT_THREAD 10
-#define DEV_TYPE_CMD 1
-#define DEV_TYPE_STAT 2
 #define CM_IP_LIST	"/etc/cmserver.lst"
 #define CMTKD_CONF 	"/etc/cmtk/cmtkd_config.ini"
 
@@ -18,13 +16,13 @@
 #include "cm_plugin.h"
 
 #include <stdarg.h>
-#include "cmdhelper.h"
+#include "cmtkp.h"
 #ifdef __LINUX__
 #include <pthread.h>
 #endif
 #define STR_IP(str, n) sprintf((str), "%u.%u.%u.%u", (n)  & 0xff, ((n)>> 8) & 0xff, ((n)>>16) & 0xff, ((n)>>24) & 0xff)
 using namespace std;
-using namespace cmdhelper;
+using namespace cmtkp;
 
 //define struct of configuration for cmserver
 typedef struct
@@ -34,10 +32,10 @@ typedef struct
 	unsigned short 	daemon;
 	unsigned short 	mode; // 1 for popen 2 for system
 	unsigned short	threadnum;//number of working threads
-	unsigned short	devtype;	//1 for master 2 for slave
 	unsigned short  active; //update task active
 	unsigned short	interval;// heart beat interval
 	unsigned short  auth_on;//
+	unsigned short  limited;// run limited command --added by duanjigang@2011-11-25
 }cm_server_config_t;
 
 #define CONF_FILE 128 //config file name length
@@ -65,7 +63,7 @@ typedef  struct
 	int 	 nret;		//return value > 0 success else failed
 	time_t	start_time;	//when it start to runing..
 	time_t	finish_time;	//when it finish running..
-	::cmdhelper::StringArray retmsg;//result of command
+	::cmtkp::StringArray retmsg;//result of command
 }cmdev_t;
 //function to handle message for each device
 typedef int(*host_func_t)(cmdev_t * dev);
@@ -102,7 +100,7 @@ typedef struct _task_t
 	struct _task_t * next;			//where next node is stored
 	//define for command and result
 	string   cmd_data;			//what command to run
-	::cmdhelper::StringArray cmd_ret;	//what the command runs for ?
+	::cmtkp::StringArray cmd_ret;	//what the command runs for ?
 }task_t;
 
 //define for task list

@@ -17,8 +17,8 @@ int	parse_options (int argc, char* argv[])
 	g_server_config.mode = 0;
 	g_server_config.active = 0;
 	g_server_config.threadnum = DFT_THREAD;
-	g_server_config.devtype = DEV_TYPE_CMD;
 	g_server_config.interval = 60;
+	g_server_config.limited = 1;
 	
 	//reading configuration from stdin
 	char *cvalue = NULL;
@@ -26,7 +26,7 @@ int	parse_options (int argc, char* argv[])
      	char ec;
 	int error = 0;
        
-	while ((c = getopt (argc, argv, "p:dsat:T:i:hvf:")) != -1)
+	while ((c = getopt (argc, argv, "p:dsat:i:hrvf:")) != -1)
 	{
          	switch (c)
            	{
@@ -87,21 +87,6 @@ int	parse_options (int argc, char* argv[])
 				}
 				break;
 			//server type, command server or stat server	
-			case 'T':
-				cvalue = optarg;
-
-				if (strcmp(cvalue, "stat") == 0)
-				{
-					g_server_config.devtype = DEV_TYPE_STAT;
-				}else if (strcmp(cvalue, "cmd") == 0)
-				{
-					g_server_config.devtype = DEV_TYPE_CMD;
-				}else
-				{
-					printf ("error value for -T [stat|cmd]\n");
-					error = 1;
-				}	
-				break;
 			case '?':
 				ec = optopt;
 				error = 1;
@@ -111,11 +96,18 @@ int	parse_options (int argc, char* argv[])
 				error  = 1;
 				printf ("option '%c' need a parameter\n", optopt);
 				break;	
+			//added by duanjigang@2011-11-25 for limited command --start
+			case 'r':
+				g_server_config.limited = 0;
+				break;
+			//added by duanjigang@2011-11-25 for limited command --finished
+				
 			case 'h':
-				printf ("usage:%s [-d] [-s] [-p port]  [-t threadnumber] [-T stat|cmd] [-i syslog interval]\n", argv[0]);
+				printf ("usage:%s [-d] [-s] [-p port]  [-t threadnumber]  [-i syslog interval]\n", argv[0]);
 				printf ("\t-d\t--daemon\t run as a daemon\n");
 				printf ("\t-s\t--system\t run command with system(use open as a default method)\n");
 				printf ("\t-a\t--active\t update task activly\n");
+				printf ("\t-r\t--root\t run any command as root\n");
 				error = 1;
 				break;
 			//added by duanjigang1983@2011-10-29 13:44 for version --start
@@ -161,5 +153,6 @@ int 	show_version 	(int argc, char* argv[])
 	printf ("%s version list:\n", argv[0]);
 	printf ("\tv1.0 2011-10-29:create version by duanjigang1983\n");
 	printf ("\tv1.1 2011-11-02:adding interface of file fetching by duanjigang1983\n");
+	printf ("\tv1.2 2011-11-25:adding limited command support  by duanjigang1983\n");
 	return 1;
 }

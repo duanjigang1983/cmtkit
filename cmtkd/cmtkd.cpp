@@ -4,13 +4,13 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <Ice/Ice.h>
-#include "cmdhelper.h"
+#include "cmtkp.h"
 #include "cmconfig.h"
 #include "MessageHandler.h"
 #include "cmutils.h"
 
 using namespace std;
-using namespace cmdhelper;
+using namespace cmtkp;
 
 Ice::CommunicatorPtr g_ic;
 extern cm_server_config_t g_server_config;
@@ -39,11 +39,7 @@ int t_main(int argc, char* argv[])
 		init_syslog ();
 		load_plugin (g_server_config.plugin_dir);//added by duanjigang@2011-11-13
 		adjust_path ();
-		show_plist ();
-		/*if ( parse_options (argc, argv) <= 0 )
-		{
-			return 0;
-		}*/
+		//show_plist ();
 		
 		try
 		{
@@ -55,9 +51,8 @@ int t_main(int argc, char* argv[])
 			id.properties = props;
 			g_ic = Ice::initialize(id);
 
-			//g_ic = Ice::initialize(argc, argv);
 			Ice::ObjectAdapterPtr adapter =
-			g_ic->createObjectAdapterWithEndpoints("cmdhelper", szProxy);
+			g_ic->createObjectAdapterWithEndpoints("cmtkp", szProxy);
 			CMessageHandler * pH = new CMessageHandler;
 			
 			if (pH->init_server() <= 0)
@@ -67,10 +62,9 @@ int t_main(int argc, char* argv[])
 			}
 			
 			Ice::ObjectPtr object = pH;
-			adapter->add(object, g_ic->stringToIdentity("cmdhelper"));
+			adapter->add(object, g_ic->stringToIdentity("cmtkp"));
 			adapter->activate();
 			syslog_msg ("INFO [cmserver star running]");	
-			//cout << argv[0] << "server start running..." << endl;
 			g_ic->waitForShutdown(); //
 		}
 		catch (const Ice::Exception & e)

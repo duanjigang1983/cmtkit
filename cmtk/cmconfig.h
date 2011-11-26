@@ -16,13 +16,13 @@
 #include "NetHelper.h"
 
 #include <stdarg.h>
-#include "cmdhelper.h"
+#include "cmtkp.h"
 #ifdef __LINUX__
 #include <pthread.h>
 #endif
 #define STR_IP(str, n) sprintf((str), "%u.%u.%u.%u", (n)  & 0xff, ((n)>> 8) & 0xff, ((n)>>16) & 0xff, ((n)>>24) & 0xff)
 using namespace std;
-using namespace cmdhelper;
+using namespace cmtkp;
 
 //define struct of configuration for cmserver
 typedef struct
@@ -63,7 +63,7 @@ typedef  struct
 	int 	 nret;		//return value > 0 success else failed
 	time_t	start_time;	//when it start to runing..
 	time_t	finish_time;	//when it finish running..
-	::cmdhelper::StringArray retmsg;//result of command
+	::cmtkp::StringArray retmsg;//result of command
 }cmdev_t;
 //function to handle message for each device
 typedef int(*host_func_t)(cmdev_t * dev);

@@ -295,38 +295,52 @@ int  run_limit_cmd (const char* szline, const char* szfile)
 	char szbuf[1024] = {0};
 	char szdir[512] = {0};
 	char szname[256] = {0};
-	if (!szline) return 0;
+	if (!szline)
+	{
+		printf ("EXIT:%s-%d\n", __FILE__,__LINE__);
+		 return 0;
+	}
 	strcpy (szbuf, szline);
 	len = strlen (szbuf);
 	unsigned int dir_len = 0;
-	char * tmpdir = dirname (szbuf);
-	if (tmpdir)
+	if (1)
 	{
-		strcpy (szdir, tmpdir);
-		if (szdir[0] == '.') memset(szdir, 0, sizeof(szdir));
+		char * bl = strchr (szbuf, ' ');
+		if (bl) *bl = '\0';
+		char *tmpdir = dirname (szbuf);
+		if (tmpdir)
+		{
+			strcpy (szdir, tmpdir);
+			if (szdir[0] == '.') memset(szdir, 0, sizeof(szdir));
+		}
 	}
 	
 	dir_len = strlen (szdir);
-	memset (szbuf, 0, sizeof(szbuf));
+	memset (szbuf, '\0', sizeof(szbuf));
 	strcpy (szbuf, szline);
+	//strcat (szbuf, "\0");
 	char * pstart = szbuf + strlen(szdir);
-	if (*pstart == '/') pstart++;
+	while (pstart && *pstart && *pstart == '/')
+	 pstart++;
 	char * finish = pstart;
 	unsigned char loop = 1;
-	while (finish && !isspace(*finish))finish++;
+	while (finish && !isspace(*finish) && *finish)finish++;
 	
 	while (pdir && loop)
 	{
+		printf ("loop:%s-%u-%u\n", pdir->path, dir_len, (unsigned)strlen(pdir->path));
 		do
 		{
 			if (dir_len != strlen(pdir->path))break;
 			cm_plugin_t * pp = pdir->plist;
+			printf ("in package:%s\n", pdir->path);
 			while (pp && loop)
 			{
 				do
 				{
 					if (strlen(pp->name) != (unsigned int)(finish - pstart)) break;
 					if (strncmp(pp->name, pstart, (unsigned int)(finish - pstart))) break;
+					printf ("<%s-%s-%u>\n", pp->name, pstart, (unsigned int)(finish - pstart));
 					find = 1;
 					prun = pp;
 					loop = 0;
@@ -362,7 +376,7 @@ int  run_limit_cmd (const char* szline, const char* szfile)
 			int nFd =  open (szfile, O_CREAT|O_RDWR, 0644);	
 			if (nFd == -1)
 			{
-				fprintf (stderr, "open file '%s' for writing failed\n", szfile);
+				printf ("%s-%d:open file '%s' for writing failed\n", __FILE__, __LINE__, szfile);
 				exit (0);
 			}
 			dup2(nFd, 2);
@@ -382,13 +396,18 @@ int  run_limit_cmd (const char* szline, const char* szfile)
 			sprintf (name, "%s", basename(szbuf));
 			if (*p)
 			{	
+				//printf("[%s]\n", p);
 				ntok = makeargv (p, &argv_list);
-				/*for (i = 0; i < ntok; i++)
+			    	/*
+				for (i = 0; i < ntok; i++)
 				{
-					printf ("token[%d]=%s\n", i, argv_list[i]);
+					printf ("token[%d]=%s[%u]\n", i, argv_list[i], strlen(argv_list[i]));
 				}*/
-			}else  ntok = 0;
-
+			}else  
+			{
+				//printf ("================no parameter======\n");
+				ntok = 0;
+			}
 			if (ntok < 0 )
 			{
 				printf ("error parameter:[%s]\n", p);
@@ -409,14 +428,14 @@ int  run_limit_cmd (const char* szline, const char* szfile)
 		
 			argvs [size + 1] = NULL;
 
-			memset (szbuf, 0, sizeof(szbuf));
+			//memset (szbuf, 0, sizeof(szbuf));
 			//if (execvp(szname, argvs) < 0)
 			if (access (szname, X_OK))
 			{
 				perror("");
 				exit (0);
 			}
-			
+			//printf ("EXE:%s\n", szname);
 			if (execvp(szname,  argvs) < 0)
 			{
 				perror("Error on execv:");
@@ -431,6 +450,10 @@ int  run_limit_cmd (const char* szline, const char* szfile)
 		{
 			wait (NULL);
 		}
+	}else
+	{
+		printf ("can not find command:%s-%d\n", __FILE__,__LINE__);
+		return -1;
 	}
 	return 1;
 }

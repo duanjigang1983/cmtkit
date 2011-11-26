@@ -21,8 +21,6 @@ host_func_t g_host_func = 0;
 int send_cmd2host (cmdev_t* dev);
 //send file to host
 int send_file2host (cmdev_t* dev);
-//send notify message to host
-int send_notify2host (cmdev_t *dev);
 //fetch file from host
 int fetch_file_from_host (cmdev_t *dev);
 
@@ -178,8 +176,8 @@ int init_parameters(int argc, char* argv[])
 					break;
 				}
 				g_client_config.mode = MODE_CMD;
-				//strcpy(g_client_config.command, optarg);
-				memcpy(g_client_config.command, optarg, strlen(optarg));
+				strcpy(g_client_config.command, optarg);
+				//memcpy(g_client_config.command, optarg, strlen(optarg));
                                 break;
 			//update file name
 			case 'u':
@@ -771,11 +769,11 @@ int send_cmd2host (cmdev_t* dev)
 	{
 		
 		char szproxy [PROXY_LEN] = {0}; // what we use to identify a connection
-		sprintf (szproxy, "cmdhelper:tcp -h %s -p %u -t %u", 
+		sprintf (szproxy, "cmtkp:tcp -h %s -p %u -t %u", 
 			szip, 
 			g_client_config.remote_port, g_client_config.time_out * 1000);
 		Ice::ObjectPrx  base = g_ic->stringToProxy(szproxy);
-		cmdhelper::CmdMessageHandlerPrx  client = 
+		cmtkp::CmdMessageHandlerPrx  client = 
 		CmdMessageHandlerPrx::checkedCast(base);
                 if(!client)
                 {
@@ -804,7 +802,8 @@ int send_cmd2host (cmdev_t* dev)
 		if (RUN_REAL == g_client_config.run_mode)	
 		{
 
-			if (ret_msg.head.nret > 0)
+			//if (ret_msg.head.nret > 0)
+			if (1)
 			{
 				for (unsigned int i = 0; i < ret_msg.result.size(); i++)
 				{
@@ -839,72 +838,6 @@ ret:
 	return nRet;
 }
 
-//notify but not send data to client
-int send_notify2host (cmdev_t *dev)
-{
-
-	int nRet = RET_SUCCES;
-	bool connected = false;
-	char szip[20] = {0};
-	::cmdhelper::command g_cmd;
-	if (!dev)
-	{
-		 printf ("invalid parameter[%s:%d]\n",__FILE__, __LINE__);
-		 exit(0);
-	}
-	STR_IP (szip, dev->dev_ip);
-	try
-	{
-		char szproxy [PROXY_LEN] = {0}; // what we use to identify a connection
-		
-		g_cmd.host		= 	g_client_config.local_addr;
-		g_cmd.port 		= 	g_client_config.local_port;
-		g_cmd.cmdid		=	g_command_id;
-		g_cmd.cmdtype		=	CMD_TYPE_NOTIFY;
-		g_cmd.pid		=	getpid ();
-		g_cmd.clientaddr	=	dev->dev_ip;
-		g_cmd.data.clear();
-
-		sprintf (szproxy, "cmdhelper:tcp -h %s -p %u -t %u", 
-		szip, g_client_config.remote_port,
-		g_client_config.time_out * 1000);
-		//sprintf (szproxy, "cmdhelper:udp -h %s -p 1221", szip);
-		Ice::ObjectPrx  base = g_ic->stringToProxy(szproxy);
-		cmdhelper::CmdMessageHandlerPrx  client = 
-		CmdMessageHandlerPrx::checkedCast(base);
-                if(!client)
-                {
-			//throw "invalud proxy:ComPlusBasePrx::checkedCast(base)";
-        		nRet = RET_CONNECT_FAILED;
-			goto ret;
-		}
-		connected = true;
-
-		::cmdhelper::command ret = client->ProcessCmd(g_cmd);
-		nRet = 1;
-	}catch(const Ice::Exception & ex)
-        {
-                //cerr << ex << endl;
-		nRet = RET_CONNECT_FAILED;
-		if (connected)
-		{
-			nRet = RET_RUNCMD_FAILED;
-		}
-		goto ret;
-        }catch(const char* msg)
-        {
-                //cerr << msg << endl;
-		nRet = RET_CONNECT_FAILED;
-		if (connected)
-		{
-			nRet = RET_RUNCMD_FAILED;
-		}
-
-		goto ret;
-	}
-ret:
-	return nRet;
-}
 int send_file2host (cmdev_t * dev)
 { 
 
@@ -928,11 +861,11 @@ int send_file2host (cmdev_t * dev)
 	try
 	{
 		char szproxy [PROXY_LEN] = {0}; // what we use to identify a connection
-		sprintf (szproxy, "cmdhelper:tcp -h %s -p %u -t %u", 
+		sprintf (szproxy, "cmtkp:tcp -h %s -p %u -t %u", 
 		szip, g_client_config.remote_port,
 		g_client_config.time_out * 1000);
 		Ice::ObjectPrx  base = g_ic->stringToProxy(szproxy);
-		cmdhelper::CmdMessageHandlerPrx  client = 
+		cmtkp::CmdMessageHandlerPrx  client = 
 		CmdMessageHandlerPrx::checkedCast(base);
                 if(!client)
                 {
@@ -1014,8 +947,9 @@ void	show_result_front(void)
 		char szip[20] = {0};
 		cmdev_t *p = g_dev_list.dev_list + i;
 		STR_IP (szip, p->dev_ip);	
+		
 		if (g_client_config.color)
-		printf ("("GREEN"%s"NONE"):["YELLOW"%s"NONE"]\n", p->dev_name,  szip);
+			printf ("("GREEN"%s"NONE"):["YELLOW"%s"NONE"]\n", p->dev_name,  szip);
 		else
 		printf ("(%s):[%s]\n", p->dev_name,  szip);
 
@@ -1193,6 +1127,7 @@ int 	show_version (int argc, char* argv[])
 		printf ("%s version list:\n", argv[0]);
 		printf ("\t v1.0 2011-10-29:create version by duanjigang1983\n");
 		printf ("\t v1.1 2011-11-02:adding file fetching interface by duanjigang1983\n");
+		printf ("\t v1.2 2011-11-26:simplify source code by duanjigang1983\n");
 		return 0;;
 }
 //added by duanjigang1983@2011-11-01 --start
@@ -1222,12 +1157,12 @@ int fetch_file_from_host (cmdev_t *dev)
 		char szproxy [PROXY_LEN] = {0}; // what we use to identify a connection
 		
 		g_fetch_msg.filedata.clear();	
-		sprintf (szproxy, "cmdhelper:tcp -h %s -p %u -t %u", 
+		sprintf (szproxy, "cmtkp:tcp -h %s -p %u -t %u", 
 		szip, g_client_config.remote_port,
 		g_client_config.time_out * 1000);
 		//printf ("===%s\n", szproxy);
 		Ice::ObjectPrx  base = g_ic->stringToProxy(szproxy);
-		cmdhelper::CmdMessageHandlerPrx  client = 
+		cmtkp::CmdMessageHandlerPrx  client = 
 		CmdMessageHandlerPrx::checkedCast(base);
                 if(!client)
                 {

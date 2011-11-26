@@ -14,34 +14,30 @@ int main (int argc, char* argv[])
 {
 
 	int nRet = 0;
-	#if 0
-	for (int i = 0; i < argc; i++)
-	printf ("[%s]",argv[i]);
-	printf ("\n");
-	#endif
+	
 	//init parameter
 	if (init_parameters (argc, argv) <= 0)
 	{
-		//printf ("init_parameters failed\n");
-		return -1;
+		printf ("%s-%d:init_parameters failed\n", __FILE__, __LINE__);
+		return 1;
 	}
 
 	//init device list
-	if ((nRet = init_devlist()) <= 0)
+	if ((nRet = init_devlist ( )) <= 0)
 	{
-		printf ("init_devlist failed\n");
-		return -1;
+		printf ("%s-%d:init_devlist failed\n", __FILE__, __LINE__);
+		return 1;
 	}
 
 	//init tasks, load command or file content
 	if (init_tasks() <= 0)
 	{
-		printf ("init_tasks failed\n");
-		return -1;
+		printf ("%s-%d:init_tasks failed\n", __FILE__, __LINE__);
+		return 1;
 	}
+	
 	#if 0
-	print_thread_list();
-	return 1;
+		print_thread_list();
 	#endif
 	init_ice (argc, argv );
 
@@ -49,9 +45,9 @@ int main (int argc, char* argv[])
 	
 	//init ice object
 	
-	if (start_tasks() <= 0)
+	if (start_tasks ( ) <= 0)
 	{
-		printf ("start tasks failed\n");
+		printf ("%s-%d:start tasks failed\n", __FILE__, __LINE__);
 		return 1;
 	}
 	//waitting all tasks to run over	
@@ -60,6 +56,6 @@ int main (int argc, char* argv[])
 		usleep(10);
 	}
 	//print all results
-	show_results();
+	show_results ( );
 	return 1;
 }

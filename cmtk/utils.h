@@ -16,11 +16,11 @@
 #include <sys/stat.h>
 #include <Ice/Ice.h>
 #include <sys/types.h>
-#include "cmdhelper.h"
+#include "cmtkp.h"
 #include "constdef.h"
 #include "cmconfig.h"
 using namespace std;
-using namespace cmdhelper;
+using namespace cmtkp;
 
 extern int 	init_parameters(int argc, char* argv[]);
 extern int 	init_devlist(void);
