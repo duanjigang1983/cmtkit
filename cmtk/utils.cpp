@@ -50,7 +50,6 @@ int init_parameters(int argc, char* argv[])
 	g_client_config.mode = 0;
 	g_client_config.time_out = 2;
 	g_client_config.color = 0;
-	g_client_config.auth = 0;
 	g_client_config.silent = 0;//added @2011-03-28
 	//added by djg@2011-03-09--start
 	g_client_config.run_mode = RUN_REAL;
@@ -58,7 +57,7 @@ int init_parameters(int argc, char* argv[])
 	struct hostent *host  = 0;
 	int len = 0;
 
-	while ((c = getopt (argc, argv, "p:h:P:H:f:c:n:u:d:t:bsaxvl:r:")) != -1) 
+	while ((c = getopt (argc, argv, "p:h:P:H:f:c:n:u:d:t:bsxvl:r:")) != -1) 
        {   
                 switch (c) 
                 {   
@@ -80,9 +79,6 @@ int init_parameters(int argc, char* argv[])
 			///added @2011-03-28 --end
 			
 			//--added @2011-05-05 --start for get task actively
-			case 'a':
-				g_client_config.auth  = 1;//auth flag
-				break;
 			//--added @2011-05-05 --finish for get task actively
 			//remote host
 
@@ -279,18 +275,6 @@ int init_parameters(int argc, char* argv[])
 			goto ret;
 		}
 			}
-
-	if (!g_client_config.auth)
-	{
-		CIniHelper helper(CMTK_CONF);
-		if(helper.ErrorOccurence())
-		{
-			;
-		}else
-		{
-			g_client_config.auth = helper.ReadInt("general", "auth", 0);
-		}
-	}
 
 	if (!g_client_config.forbid_root)
 	{
@@ -1099,7 +1083,6 @@ static opt_help_t opt_list [] =
 	{ "-d", "dest file path to save", 1},
 	{ "-s", "run command silent", 1},
 	{ "-t", "time out value ", 1},
-	{ "-a", "authorize user on", 1},
 	{ "-v", "show cmtk version list", 1},
 	//added by duanjigang@2011-11-01 for fetching file --start
 	{ "-r", "remote file to download", 1},	

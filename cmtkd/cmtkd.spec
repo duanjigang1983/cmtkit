@@ -1,6 +1,6 @@
 %define orgniname cmtkitd
-%define version 1.0.1
-%define unmangled_version 1.0.1
+%define version 1.0.3
+%define unmangled_version 1.0.3
 %define	_prefix /usr
 %define release 1.el5
 
@@ -29,6 +29,7 @@ make
 cp cmtkd /usr/bin/
 mkdir -pv /etc/cmtk
 cp cmtkd_config.ini /etc/cmtk/
+cp -r plugin /etc/cmtk
 cp cmtkitd /etc/init.d/
 chkconfig --add cmtkitd 
 chmod a+x /etc/init.d/cmtkitd 
@@ -39,6 +40,7 @@ chmod a+r /etc/cmtk/  -R
 service cmtkitd stop
 chkconfig --del cmtkitd
 unlink /etc/init.d/cmtkitd
+rm -fr /etc/cmtk/plugin
 
 
 %clean

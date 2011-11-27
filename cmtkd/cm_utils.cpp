@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "cmconfig.h"
-
+/*
 char*	get_conf(const char* path, const char* dft)
 {
 	static char szret[256] = {0};
@@ -67,7 +67,7 @@ char*	get_conf(const char* path, const char* dft)
 		sprintf (szret, "%s", dft);
 	}
 	return szret;
-}
+}*/
 int 	mkdir_rec(const char* path)
 {
 	char szpath[512] = {0};

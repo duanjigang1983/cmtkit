@@ -1,7 +1,7 @@
 #ifndef _CM_CONFIG_H_
 #define _CM_CONFIG_H_
 
-#define DFT_PORT 43699
+#define DFT_PORT 43670
 #define DFT_DM   0
 #define DFT_MODE 1
 #define DFT_THREAD 10
@@ -34,7 +34,6 @@ typedef struct
 	unsigned short	devtype;	//1 for master 2 for slave
 	unsigned short  active; //update task active
 	unsigned short	interval;// heart beat interval
-	unsigned short  auth_on;//
 }cm_server_config_t;
 
 #define CONF_FILE 128 //config file name length
@@ -107,8 +106,6 @@ typedef struct
 	unsigned short	local_port;		//when address to connect
 	unsigned short 	forbid_root;		//forbid root login or run flag
 	unsigned short	tasknum;		//how many tasks are running
-	//unsigned short  active;			//get task actively
-	//unsigned short  auth;			//get task actively
 	unsigned short  color;			//print with color
 	unsigned int	local_addr; 		//tell him where to reply the command
 	unsigned int	remote_addr;		//same as above
@@ -129,7 +126,6 @@ typedef struct
 	//added by duanjigang@2011-08-01 --end
 	//added by duanjigang@2011-08-18 --start
 	unsigned short	forbidroot;
-	unsigned short	auth; 
 	//added by duanjigang@2011-08-18 --end
 
 	//added by duanjigang1983@2011-11-01 --start for file fecth 

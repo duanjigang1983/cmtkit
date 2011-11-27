@@ -25,7 +25,7 @@ int init_syslog()
 		return 1;
 	}
 
-	log_on 		= 	helper.ReadInt("syslog", 	"on", 		1);	
+	log_on 		= 	helper.ReadInt("syslog", 	"on", 		0);	
 	interval 	= 	helper.ReadInt("syslog",	"interval", 	60);	
 	if (interval < 60) interval = 60;
 	sprintf (szbuf, "%s", helper.ReadString ("syslog",	"facility", 	"local5"));
@@ -60,7 +60,7 @@ int init_syslog()
 
 
 	memset (szbuf, 0, sizeof(szbuf));
-	sprintf (szbuf, "%s", get_conf ("cmtools/syslog/leve", "info"));
+	sprintf (szbuf, "%s", helper.ReadString ("syslog",	"level", 	"info"));
 	
 	if (!strcmp(szbuf, "emerg"))
 	{

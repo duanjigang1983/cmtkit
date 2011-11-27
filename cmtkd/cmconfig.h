@@ -1,7 +1,7 @@
 #ifndef _CM_CONFIG_H_
 #define _CM_CONFIG_H_
 
-#define DFT_PORT 43699
+#define DFT_PORT 43670
 #define DFT_DM   0
 #define DFT_MODE 1
 #define DFT_THREAD 10
@@ -32,7 +32,7 @@ typedef struct
 	unsigned short 	daemon;
 	unsigned short 	mode; // 1 for popen 2 for system
 	unsigned short	threadnum;//number of working threads
-	unsigned short  active; //update task active
+//	unsigned short  active; //update task active
 	unsigned short	interval;// heart beat interval
 	unsigned short  auth_on;//
 	unsigned short  limited;// run limited command --added by duanjigang@2011-11-25

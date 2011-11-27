@@ -12,14 +12,14 @@
 DFT_PORT=43699
 #default syslog interval
 DFT_INTERVAL=60
-CONF=/etc/cmtkd_config.ini
+CONF=/etc/cmtk/cmtkd_config.ini
 
 get_var_value (){
 	name=$1
 
 	if test -f "$CONF"
 	then
-		var=`cat $CONF | grep $name | awk -F ':' '{print$2}'`
+		var=`cat $CONF | grep $name | awk -F '=' '{print$2}'`
 		if [ -z $var ]
 		then
 			var=$DFT_PORT
@@ -42,12 +42,41 @@ start()
 			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 			port=`get_var_value port`
 			intv=`get_var_value interval`
-			nohup /usr/bin/cmtkd -p $port -T cmd -d -i $intv  >/dev/null 2>&1 0</dev/null &
+			plugin=`get_var_value plugin`
+			auth=""
+			sd=" "
+			tsd=`get_var_value sudo`
+			if [ $tsd == 'yes' ]
+			then
+				sd="-r"
+			fi
+			tauth=`get_var_value auth`
+			if  [ $tauth == 'on' ]
+			then
+				auth="-a"
+			fi
+			#nohup /usr/bin/cmtkd -p $port  -d -i $intv -f $plugin -r $auth >/dev/null 2>&1 0</dev/null &
+			 /usr/bin/cmtkd -p $port  -d -i $intv -f $plugin $sd $auth 
 		else
 			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64
 			port=`get_var_value port`
 			intv=`get_var_value interval`
-			nohup /usr/bin/cmtkd -p $port -T cmd -d -i $intv  >/dev/null 2>&1 0</dev/null &
+			plugin=`get_var_value plugin`
+			auth=""
+			sd=" "
+			tsd=`get_var_value sudo`
+			if [ $tsd == 'yes' ]
+			then
+				sd="-r"
+			fi
+
+			tauth=`get_var_value auth`
+			if  [ $tauth == 'on' ]
+			then
+				$auth="-a"
+			fi
+
+			nohup /usr/bin/cmtkd -p $port  -d -i $intv -f $plugin $sd $auth >/dev/null 2>&1 0</dev/null &
 		fi
 
          else

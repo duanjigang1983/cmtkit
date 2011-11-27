@@ -15,10 +15,11 @@ int	parse_options (int argc, char* argv[])
 	g_server_config.port = DFT_PORT;
 	g_server_config.daemon = DFT_DM;
 	g_server_config.mode = 0;
-	g_server_config.active = 0;
+	//g_server_config.active = 0;
 	g_server_config.threadnum = DFT_THREAD;
 	g_server_config.interval = 60;
 	g_server_config.limited = 1;
+	g_server_config.auth_on = 0;
 	
 	//reading configuration from stdin
 	char *cvalue = NULL;
@@ -26,7 +27,7 @@ int	parse_options (int argc, char* argv[])
      	char ec;
 	int error = 0;
        
-	while ((c = getopt (argc, argv, "p:dsat:i:hrvf:")) != -1)
+	while ((c = getopt (argc, argv, "p:dst:i:hravf:")) != -1)
 	{
          	switch (c)
            	{
@@ -66,8 +67,9 @@ int	parse_options (int argc, char* argv[])
 				g_server_config.daemon = 1;
              			//printf ("daemon on\n");
              			break;
-			case 'a': //update task activly
-				g_server_config.active = 1;
+			
+			case 'a': //auth flag
+				g_server_config.auth_on = 1;
 				break;
 			//run with popen or sytem
            		case 's':
@@ -103,11 +105,13 @@ int	parse_options (int argc, char* argv[])
 			//added by duanjigang@2011-11-25 for limited command --finished
 				
 			case 'h':
-				printf ("usage:%s [-d] [-s] [-p port]  [-t threadnumber]  [-i syslog interval]\n", argv[0]);
+				printf ("usage:%s [-d] [-s] [-p port]   [-i syslog interval] [-f plugin_dir]\n", 
+					argv[0]);
 				printf ("\t-d\t--daemon\t run as a daemon\n");
-				printf ("\t-s\t--system\t run command with system(use open as a default method)\n");
-				printf ("\t-a\t--active\t update task activly\n");
-				printf ("\t-r\t--root\t run any command as root\n");
+				printf ("\t-a\t--auth\t authorize all clients\n");
+				printf ("\t-s\t--system\t run command with system(use popen as a default method)\n");
+				//printf ("\t-a\t--active\t update task activly\n");
+				printf ("\t-r\t--root\t\t run any command as root\n");
 				error = 1;
 				break;
 			//added by duanjigang1983@2011-10-29 13:44 for version --start
@@ -144,7 +148,6 @@ int	parse_options (int argc, char* argv[])
 		return 0;
 	}
 	//adding by duanjigang@2011-11-11 --finish
-	g_server_config.auth_on = atoi (get_conf("cmtools/general/auth", "1"));
 	return 1;
 }
 
@@ -154,5 +157,6 @@ int 	show_version 	(int argc, char* argv[])
 	printf ("\tv1.0 2011-10-29:create version by duanjigang1983\n");
 	printf ("\tv1.1 2011-11-02:adding interface of file fetching by duanjigang1983\n");
 	printf ("\tv1.2 2011-11-25:adding limited command support  by duanjigang1983\n");
+	printf ("\tv1.3 2011-11-27:releas new version  by duanjigang1983\n");
 	return 1;
 }
