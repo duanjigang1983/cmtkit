@@ -1,7 +1,8 @@
 #CFLAG=-c -Wall  -I/usr/local/include  -ftemplate-depth-128 -I./ -D__LINUX__ -g -I/usr/local/Ice
 CFLAG=-c -Wall -I./ -D__LINUX__ -g -I/usr/local/Ice-3.3.1/include
 CLI_OBJS=*.o
-DFLAG=-lIce -lIceUtil -lpthread -L/usr/local/Ice-3.3.1/lib
+#DFLAG=-lIce -lIceUtil -lpthread -L/usr/local/Ice-3.3.1/lib
+DFLAG=-L/lib/nptl -lrt -lIce -lIceUtil -lpthread -L/usr/local/Ice-3.3.1/lib
 CC=c++
 default:
 	$(CC) $(CFLAG)   cm_function.cpp
