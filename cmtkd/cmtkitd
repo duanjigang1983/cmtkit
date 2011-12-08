@@ -9,7 +9,7 @@
 # updating port  @2011-06-16 by jigang.djg <jigang.djg@taobao.com>
 . /etc/rc.d/init.d/functions
 #default port value
-DFT_PORT=43699
+DFT_PORT=43670
 #default syslog interval
 DFT_INTERVAL=60
 CONF=/etc/cmtk/cmtkd_config.ini
@@ -55,8 +55,8 @@ start()
 			then
 				auth="-a"
 			fi
-			#nohup /usr/bin/cmtkd -p $port  -d -i $intv -f $plugin -r $auth >/dev/null 2>&1 0</dev/null &
-			 /usr/bin/cmtkd -p $port  -d -i $intv -f $plugin $sd $auth 
+			nohup /usr/bin/cmtkd -p $port  -d -i $intv -f $plugin -r $auth >/dev/null 2>&1 0</dev/null &
+			# /usr/bin/cmtkd -p $port  -d -i $intv -f $plugin $sd $auth 
 		else
 			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64
 			port=`get_var_value port`

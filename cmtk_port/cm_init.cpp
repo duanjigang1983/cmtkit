@@ -57,7 +57,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 	}
 	
 	memset (client_config, 0, sizeof(cm_client_config_t));
-	client_config->remote_port = 0;
+	client_config->remote_port = DFT_PORT;
 	client_config->remote_addr = 0;
 //	client_config->local_port = 0;
 	//client_config->local_addr = 0; 
@@ -226,7 +226,22 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 		
 		if (0 == client_config->remote_port)
 		{
-			
+			char szconf[256] = {0};
+			char szbuf[256] = {0};
+			sprintf (szbuf, "%s", argv[0]);
+			#ifdef _WIN32	
+			char * p = NULL;
+			p = szbuf +  strlen(szbuf);
+			while(*p != '\\')
+			{
+				*p = '\0';
+				p--;
+			}
+			*p = '\0';
+			sprintf (szconf, "%s\\conf\cmtk_config.ini", szbuf);
+			#else
+			sprintf (szconf, "%s", CMTK_CONF);
+			#endif	
 			CIniHelper helper(CMTK_CONF);
 			if(helper.ErrorOccurence())
 			{
@@ -235,7 +250,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 				goto ret;
 			}
 			
-			client_config->remote_port = helper.ReadInt("general", "port", 43699);
+			client_config->remote_port = helper.ReadInt("general", "port", DFT_PORT);
 			
 			if (client_config->remote_port == 0)
 			{
@@ -245,19 +260,6 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 			}
 		}
 		
-		/*
-		if (!client_config->forbid_root)
-		{
-			CIniHelper helper(CMTK_CONF);
-			if(helper.ErrorOccurence())
-			{
-				;
-			}else
-			{
-				client_config->forbidroot = helper.ReadInt("general", "forbidroot", 0);
-			}
-		}
-		*/
 		//check for command data	
 		if ((strlen(client_config->command) == 0)&&(MODE_CMD == client_config->mode))
 		{

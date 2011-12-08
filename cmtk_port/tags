@@ -22,9 +22,6 @@ CLOSE	os_independent.h	16;"	d
 CLOSE	os_independent.h	47;"	d
 CLOSE_FILE	os_independent.h	15;"	d
 CMD_LEN	cmconfig.h	21;"	d
-CMD_TYPE	constdef.h	/^enum CMD_TYPE$/;"	g
-CMD_TYPE_CONF	constdef.h	/^	CMD_TYPE_CONF = 2$/;"	e	enum:CMD_TYPE
-CMD_TYPE_NOTIFY	constdef.h	/^	CMD_TYPE_NOTIFY = 1,$/;"	e	enum:CMD_TYPE
 CMTK_CONF	cmconfig.h	11;"	d
 CM_IP_LIST	cmconfig.h	10;"	d
 CONF_DIR	cmconfig.h	13;"	d
@@ -44,9 +41,8 @@ CommandMessage	cmtkp.h	/^struct CommandMessage$/;"	s	namespace:cmtkp
 DARY_GRAY	ColorDefine.h	10;"	d
 DEV_TYPE_CMD	cmconfig.h	8;"	d
 DEV_TYPE_STAT	cmconfig.h	9;"	d
-DFLAG	Makefile	/^DFLAG=-lIce -lIceUtil -lpthread -L\/usr\/local\/Ice-3.3.1\/lib$/;"	m
+DFLAG	Makefile	/^DFLAG=-L\/lib\/nptl -lrt -lIce -lIceUtil -lpthread -L\/usr\/local\/Ice-3.3.1\/lib$/;"	m
 DFT_DM	cmconfig.h	5;"	d
-DFT_LOGIN	constdef.h	15;"	d
 DFT_MODE	cmconfig.h	6;"	d
 DFT_PORT	cmconfig.h	4;"	d
 DFT_THREAD	cmconfig.h	7;"	d
@@ -58,7 +54,6 @@ GREEN	ColorDefine.h	6;"	d
 GetNetip	NetHelper.cpp	/^int	GetNetip(\/*unsigned int *ip*\/device_t *list)$/;"	f
 GetNetip	NetHelper.cpp	/^int	GetNetip(device_t *list)$/;"	f
 HOST_NAME	cmconfig.h	26;"	d
-INFO_DIR	constdef.h	14;"	d
 INTDIR	main.mak	/^INTDIR=.\\Debug$/;"	m
 INTDIR	main.mak	/^INTDIR=.\\Release$/;"	m
 IceDelegate	cmtkp.h	/^namespace IceDelegate$/;"	n
@@ -79,7 +74,7 @@ LINK32_OBJS	main.mak	/^LINK32_OBJS= \\$/;"	m
 MAX	IniHelper.cpp	3;"	d	file:
 MAX_DEV	cmconfig.h	24;"	d
 MAX_DEV_THREAD	cmconfig.h	25;"	d
-MAX_LOCAL_ADDR	cmconfig.h	55;"	d
+MAX_LOCAL_ADDR	cmconfig.h	43;"	d
 MAX_SEC	IniHelper.h	15;"	d
 MAX_TASK_NUM	cmconfig.h	23;"	d
 MAX_VAL	os_independent.h	60;"	d
@@ -144,10 +139,10 @@ STR_IP	os_independent.h	57;"	d
 StringArray	cmtkp.h	/^typedef ::std::vector< ::std::string> StringArray;$/;"	t	namespace:cmtkp
 StringArray2	cmtkp.h	/^typedef ::std::vector< ::cmtkp::StringArray> StringArray2;$/;"	t	namespace:cmtkp
 TASKNUM	cmconfig.h	14;"	d
-TASK_POOL_SIZE	cmconfig.h	177;"	d
+TASK_POOL_SIZE	cmconfig.h	161;"	d
 UNLINK	os_independent.h	22;"	d
 UNLINK	os_independent.h	48;"	d
-USER_NAME	cmconfig.h	56;"	d
+USER_NAME	cmconfig.h	44;"	d
 VAR_NAME	IniHelper.h	11;"	d
 VAR_VAL	IniHelper.h	12;"	d
 WHITE	ColorDefine.h	18;"	d
@@ -186,15 +181,13 @@ __write	cmtkp.cpp	/^cmtkp::magicmsg::__write(::IceInternal::BasicStream* __os) c
 __write	cmtkp.cpp	/^cmtkp::msghead::__write(::IceInternal::BasicStream* __os) const$/;"	f	class:cmtkp::msghead
 __write	cmtkp.cpp	/^cmtkp::response::__write(::IceInternal::BasicStream* __os) const$/;"	f	class:cmtkp::response
 __writeStringArray2	cmtkp.cpp	/^cmtkp::__writeStringArray2(::IceInternal::BasicStream* __os, const ::cmtkp::StringArray* begin, const ::cmtkp::StringArray* end)$/;"	f	class:cmtkp
-active	cmconfig.h	/^	unsigned short  active; \/\/update task active$/;"	m	struct:__anon1
 atoll	os_independent.h	/^static _int64 atoll(const char *string){return _atoi64(string);} $/;"	f
 byteArray	cmtkp.h	/^typedef ::std::vector< ::Ice::Byte> byteArray;$/;"	t	namespace:cmtkp
 clientaddr	cmtkp.h	/^    ::Ice::Long clientaddr;$/;"	m	struct:cmtkp::command
 clientid	cmtkp.h	/^    ::Ice::Long clientid;$/;"	m	struct:cmtkp::command
-cm_client_config_t	cmconfig.h	/^}cm_client_config_t;$/;"	t	typeref:struct:__anon2
-cm_server_config_t	cmconfig.h	/^}cm_server_config_t;$/;"	t	typeref:struct:__anon1
+cm_client_config_t	cmconfig.h	/^}cm_client_config_t;$/;"	t	typeref:struct:__anon1
 cmd	cmtkp.h	/^    ::std::string cmd;$/;"	m	struct:cmtkp::CommandMessage
-cmdev_t	cmconfig.h	/^}cmdev_t;$/;"	t	typeref:struct:__anon3
+cmdev_t	cmconfig.h	/^}cmdev_t;$/;"	t	typeref:struct:__anon2
 cmdid	cmtkp.h	/^    ::Ice::Int cmdid;$/;"	m	struct:cmtkp::command
 cmdtype	cmtkp.h	/^    ::Ice::Int cmdtype;$/;"	m	struct:cmtkp::command
 cmtkp	cmtkp.h	/^namespace cmtkp$/;"	n
@@ -202,57 +195,53 @@ cmtkp	cmtkp.h	/^namespace cmtkp$/;"	n	namespace:IceDelegate
 cmtkp	cmtkp.h	/^namespace cmtkp$/;"	n	namespace:IceDelegateD
 cmtkp	cmtkp.h	/^namespace cmtkp$/;"	n	namespace:IceDelegateM
 cmtkp	cmtkp.h	/^namespace cmtkp$/;"	n	namespace:IceProxy
-color	cmconfig.h	/^	unsigned short  color;			\/\/print with color$/;"	m	struct:__anon2
-command	cmconfig.h	/^	char		command[CMD_LEN];	\/\/which command to run$/;"	m	struct:__anon2
+color	cmconfig.h	/^	unsigned short  color;			\/\/print with color$/;"	m	struct:__anon1
+command	cmconfig.h	/^	char		command[CMD_LEN];	\/\/which command to run$/;"	m	struct:__anon1
 command	cmtkp.h	/^struct command$/;"	s	namespace:cmtkp
 commandid	cmtkp.h	/^    ::Ice::Long commandid;$/;"	m	struct:cmtkp::msghead
-conf	cmconfig.h	/^	char		conf[CONF_FILE];	\/\/where the ip list stored when we want to run a batch command$/;"	m	struct:__anon2
-config	cmconfig.h	/^	cm_client_config_t * config;$/;"	m	struct:__anon4
-daemon	cmconfig.h	/^	unsigned short 	daemon;$/;"	m	struct:__anon1
+conf	cmconfig.h	/^	char		conf[CONF_FILE];	\/\/where the ip list stored when we want to run a batch command$/;"	m	struct:__anon1
+config	cmconfig.h	/^	cm_client_config_t * config;$/;"	m	struct:__anon3
 data	cmtkp.h	/^    ::cmtkp::byteArray data;$/;"	m	struct:cmtkp::command
 data	cmtkp.h	/^    ::cmtkp::byteArray data;$/;"	m	struct:cmtkp::magicmsg
-desc	cmconfig.h	/^	char desc[30];$/;"	m	struct:__anon8
-dev_index	cmconfig.h	/^	unsigned long dev_index;$/;"	m	struct:__anon3
-dev_ip	cmconfig.h	/^	unsigned int dev_ip;  	\/\/device ip$/;"	m	struct:__anon3
-dev_list	cmconfig.h	/^	cmdev_t * 	dev_list[MAX_DEV_THREAD]; \/\/all device(s) for this thread to serve$/;"	m	struct:__anon4
-dev_list	cmconfig.h	/^	cmdev_t dev_list[MAX_DEV]; \/\/device list$/;"	m	struct:__anon6
-dev_list_t	cmconfig.h	/^}dev_list_t;$/;"	t	typeref:struct:__anon6
-dev_name	cmconfig.h	/^	char		dev_name[HOST_NAME];$/;"	m	struct:__anon3
-dev_num	cmconfig.h	/^	int	  	dev_num;\/\/number of device		$/;"	m	struct:__anon4
-dev_num	cmconfig.h	/^	int   dev_num; \/\/device number$/;"	m	struct:__anon6
-device_t	NetHelper.h	/^	}device_t;$/;"	t	typeref:struct:__anon9
-devtype	cmconfig.h	/^	unsigned short	devtype;	\/\/1 for master 2 for slave$/;"	m	struct:__anon1
-dst_file	cmconfig.h	/^	char		dst_file[CONF_DIR];		\/\/where to upload the file on dest box$/;"	m	struct:__anon2
+desc	cmconfig.h	/^	char desc[30];$/;"	m	struct:__anon7
+dev_index	cmconfig.h	/^	unsigned long dev_index;$/;"	m	struct:__anon2
+dev_ip	cmconfig.h	/^	unsigned int dev_ip;  	\/\/device ip$/;"	m	struct:__anon2
+dev_list	cmconfig.h	/^	cmdev_t * 	dev_list[MAX_DEV_THREAD]; \/\/all device(s) for this thread to serve$/;"	m	struct:__anon3
+dev_list	cmconfig.h	/^	cmdev_t dev_list[MAX_DEV]; \/\/device list$/;"	m	struct:__anon5
+dev_list_t	cmconfig.h	/^}dev_list_t;$/;"	t	typeref:struct:__anon5
+dev_name	cmconfig.h	/^	char		dev_name[HOST_NAME];$/;"	m	struct:__anon2
+dev_num	cmconfig.h	/^	int	  	dev_num;\/\/number of device		$/;"	m	struct:__anon3
+dev_num	cmconfig.h	/^	int   dev_num; \/\/device number$/;"	m	struct:__anon5
+device_t	NetHelper.h	/^	}device_t;$/;"	t	typeref:struct:__anon8
+dst_file	cmconfig.h	/^	char		dst_file[CONF_DIR];		\/\/where to upload the file on dest box$/;"	m	struct:__anon1
 dstfile	cmtkp.h	/^    ::std::string dstfile;$/;"	m	struct:cmtkp::msghead
 entry_list	IniHelper.h	/^	var_entry entry_list[MAX_VAR];$/;"	m	struct:section
 entry_number	IniHelper.h	/^	int		entry_number;$/;"	m	struct:section
 error_msg	cm_result.cpp	/^const char * error_msg(int errcode)$/;"	f
 fetch_file_from_host	cm_function.cpp	/^int fetch_file_from_host (cmdev_t *dev, const cm_client_config_t * config)$/;"	f
-file	cmconfig.h	/^	char		file[CONF_FILE];	\/\/file to upload$/;"	m	struct:__anon2
+file	cmconfig.h	/^	char		file[CONF_FILE];	\/\/file to upload$/;"	m	struct:__anon1
 file	cmtkp.h	/^    ::std::string file;$/;"	m	struct:cmtkp::msghead
-file_msg	cmconfig.h	/^	CommandMessage * file_msg; $/;"	m	struct:__anon2
+file_msg	cmconfig.h	/^	CommandMessage * file_msg; $/;"	m	struct:__anon1
 filedata	cmtkp.h	/^    ::cmtkp::byteArray filedata;$/;"	m	struct:cmtkp::CommandMessage
 filedata	cmtkp.h	/^    ::cmtkp::byteArray filedata;$/;"	m	struct:cmtkp::response
 fileinfo	cmtkp.h	/^    ::cmtkp::byteArray fileinfo;$/;"	m	struct:cmtkp::CommandMessage
 filemd5	cmtkp.h	/^    ::std::string filemd5;$/;"	m	struct:cmtkp::msghead
 filename	cmtkp.h	/^    ::std::string filename;$/;"	m	struct:cmtkp::response
 filesize	cmtkp.h	/^    ::Ice::Long filesize;$/;"	m	struct:cmtkp::msghead
-finish_time	cmconfig.h	/^	time_t	finish_time;	\/\/when it finish running..$/;"	m	struct:__anon3
-finish_time	cmconfig.h	/^	time_t 		finish_time; \/\/when it run over$/;"	m	struct:__anon4
-forbid_root	cmconfig.h	/^	unsigned short 	forbid_root;		\/\/forbid root login or run flag$/;"	m	struct:__anon2
-forbidroot	cmconfig.h	/^	unsigned short	forbidroot;$/;"	m	struct:__anon2
+finish_time	cmconfig.h	/^	time_t	finish_time;	\/\/when it finish running..$/;"	m	struct:__anon2
+finish_time	cmconfig.h	/^	time_t 		finish_time; \/\/when it run over$/;"	m	struct:__anon3
+forbid_root	cmconfig.h	/^	unsigned short 	forbid_root;		\/\/forbid root login or run flag$/;"	m	struct:__anon1
+forbidroot	cmconfig.h	/^	unsigned short	forbidroot;$/;"	m	struct:__anon1
 g_host_func	cm_init.cpp	/^host_func_t g_host_func = 0;$/;"	v
 g_ic	cm_init.cpp	/^Ice::CommunicatorPtr g_ic;$/;"	v
 getopt	getopt.cpp	/^getopt(int nargc, char* const * nargv, const char* ostr)$/;"	f
 getopt1	getopt.cpp	/^int getopt1(int nargc, char* nargv[],  const char* ostr)$/;"	f
-gid	cmtkp.h	/^    ::Ice::Int gid;$/;"	m	struct:cmtkp::msghead
 head	cmtkp.h	/^    ::cmtkp::msghead head;$/;"	m	struct:cmtkp::CommandMessage
 host	cmtkp.h	/^    ::Ice::Long host;$/;"	m	struct:cmtkp::command
 host_func_t	cmconfig.h	/^typedef int(*host_func_t)(cmdev_t * dev, const cm_client_config_t * config);$/;"	t
 hostaddr	cmtkp.h	/^    ::Ice::Long hostaddr;$/;"	m	struct:cmtkp::msghead
-hostname	cmconfig.h	/^	char	hostname[64];$/;"	m	struct:__anon7
+hostname	cmconfig.h	/^	char	hostname[64];$/;"	m	struct:__anon6
 hostport	cmtkp.h	/^    ::Ice::Int hostport;$/;"	m	struct:cmtkp::msghead
-ic	cmconfig.h	/^	Ice::CommunicatorPtr  ic;$/;"	m	struct:__anon2
 ice_adapterId	cmtkp.h	/^    ::IceInternal::ProxyHandle<CmdMessageHandler> ice_adapterId(const std::string& __id) const$/;"	f	class:IceProxy::cmtkp::CmdMessageHandler
 ice_batchDatagram	cmtkp.h	/^    ::IceInternal::ProxyHandle<CmdMessageHandler> ice_batchDatagram() const$/;"	f	class:IceProxy::cmtkp::CmdMessageHandler
 ice_batchOneway	cmtkp.h	/^    ::IceInternal::ProxyHandle<CmdMessageHandler> ice_batchOneway() const$/;"	f	class:IceProxy::cmtkp::CmdMessageHandler
@@ -278,51 +267,48 @@ ice_staticId	cmtkp.cpp	/^IceProxy::cmtkp::CmdMessageHandler::ice_staticId()$/;"	
 ice_staticId	cmtkp.cpp	/^cmtkp::CmdMessageHandler::ice_staticId()$/;"	f	class:cmtkp::CmdMessageHandler
 ice_timeout	cmtkp.h	/^    ::IceInternal::ProxyHandle<CmdMessageHandler> ice_timeout(int __timeout) const$/;"	f	class:IceProxy::cmtkp::CmdMessageHandler
 ice_twoway	cmtkp.h	/^    ::IceInternal::ProxyHandle<CmdMessageHandler> ice_twoway() const$/;"	f	class:IceProxy::cmtkp::CmdMessageHandler
-index	cmconfig.h	/^	int 		index; \/\/index of this thread or task $/;"	m	struct:__anon4
-index	cmconfig.h	/^	unsigned long index;$/;"	m	struct:__anon3
+index	cmconfig.h	/^	int 		index; \/\/index of this thread or task $/;"	m	struct:__anon3
+index	cmconfig.h	/^	unsigned long index;$/;"	m	struct:__anon2
 index	cmtkp.h	/^    ::std::string index;$/;"	m	struct:cmtkp::msghead
 infodata	cmtkp.h	/^    ::cmtkp::byteArray infodata;$/;"	m	struct:cmtkp::response
 infoname	cmtkp.h	/^    ::std::string infoname;$/;"	m	struct:cmtkp::response
 init_devlist	cm_init_dev.cpp	/^int init_devlist(dev_list_t * dev_list, const cm_client_config_t *config)$/;"	f
-init_ice	cm_init.cpp	/^int init_ice(int argc, char* argv[], Ice::CommunicatorPtr & ic)$/;"	f
+init_ice	cm_init.cpp	/^int init_ice(int argc, char* argv[])$/;"	f
 init_network	cm_init.cpp	/^int init_network (void)$/;"	f
 init_parameters	cm_init.cpp	/^int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)$/;"	f
 init_tasks	cm_init_task.cpp	/^int init_tasks(cm_client_config_t * config, $/;"	f
-interval	cmconfig.h	/^	unsigned short	interval;\/\/ heart beat interval$/;"	m	struct:__anon1
-ip	NetHelper.h	/^		unsigned int ip;$/;"	m	struct:__anon9
+ip	NetHelper.h	/^		unsigned int ip;$/;"	m	struct:__anon8
 ipArray	cmtkp.h	/^typedef ::std::vector< ::Ice::Long> ipArray;$/;"	t	namespace:cmtkp
-ip_struct_t	cmconfig.h	/^}ip_struct_t;$/;"	t	typeref:struct:__anon7
-ipaddr	cmconfig.h	/^	unsigned int ipaddr;$/;"	m	struct:__anon7
-iplist	cmconfig.h	/^	device_t	iplist[MAX_LOCAL_ADDR];$/;"	m	struct:__anon2
-ipnum	cmconfig.h	/^	unsigned int 	ipnum;$/;"	m	struct:__anon2
+ip_struct_t	cmconfig.h	/^}ip_struct_t;$/;"	t	typeref:struct:__anon6
+ipaddr	cmconfig.h	/^	unsigned int ipaddr;$/;"	m	struct:__anon6
+iplist	cmconfig.h	/^	device_t	iplist[MAX_LOCAL_ADDR];$/;"	m	struct:__anon1
+ipnum	cmconfig.h	/^	unsigned int 	ipnum;$/;"	m	struct:__anon1
 key_t	os_independent.h	/^typedef int key_t;$/;"	t
 load_file2msg	cm_init_task.cpp	/^int load_file2msg(const char * szfile, CommandMessage * file_msg, const cm_client_config_t * config)$/;"	f
-local_file	cmconfig.h	/^	char		local_file  [CONF_DIR]; \/\/which to save$/;"	m	struct:__anon2
-localaddr	cmtkp.h	/^    ::Ice::Long localaddr;$/;"	m	struct:cmtkp::msghead
+local_file	cmconfig.h	/^	char		local_file  [CONF_DIR]; \/\/which to save$/;"	m	struct:__anon1
 localfile	cmtkp.h	/^    ::std::string localfile;$/;"	m	struct:cmtkp::msghead
-login	cmconfig.h	/^	char		login	[USER_NAME];$/;"	m	struct:__anon2
-login	cmtkp.h	/^    ::std::string login;$/;"	m	struct:cmtkp::msghead
+login	cmconfig.h	/^	char		login	[USER_NAME];$/;"	m	struct:__anon1
 m_Error	IniHelper.h	/^	int  m_Error; \/\/ error flag$/;"	m	class:CIniHelper
 m_fp	IniHelper.h	/^	FILE * m_fp ; \/\/file pointer$/;"	m	class:CIniHelper
 m_nRet	IniHelper.h	/^	int  m_nRet;$/;"	m	class:CIniHelper
 m_pos	IniHelper.h	/^	long m_pos;$/;"	m	class:CIniHelper
 m_strRet	IniHelper.h	/^	char m_strRet[VAR_VAL];$/;"	m	class:CIniHelper
-mac	NetHelper.h	/^		unsigned char mac[6];$/;"	m	struct:__anon9
+mac	NetHelper.h	/^		unsigned char mac[6];$/;"	m	struct:__anon8
 magicmsg	cmtkp.h	/^struct magicmsg$/;"	s	namespace:cmtkp
 main	main.cpp	/^int main( int argc, char* argv[])$/;"	f
 mem_file_handle	os_independent.h	/^typedef HANDLE    mem_file_handle;$/;"	t
 mem_file_handle	os_independent.h	/^typedef void*    mem_file_handle;$/;"	t
 mkdir_rec	cm_utils.cpp	/^int 	mkdir_rec(const char* path)$/;"	f
-mode	cmconfig.h	/^	char		mode;			\/\/1 for cmd and 2 for file$/;"	m	struct:__anon2
-mode	cmconfig.h	/^	unsigned short 	mode; \/\/ 1 for popen 2 for system$/;"	m	struct:__anon1
+mode	cmconfig.h	/^	char		mode;			\/\/1 for cmd and 2 for file$/;"	m	struct:__anon1
 more	cmtkp.h	/^    ::Ice::Int more;$/;"	m	struct:cmtkp::response
 msghead	cmtkp.h	/^struct msghead$/;"	s	namespace:cmtkp
 msgtype	cmtkp.h	/^    ::Ice::Int msgtype;$/;"	m	struct:cmtkp::msghead
+my_basename	cm_utils.cpp	/^char* my_basename (char* path)$/;"	f
 my_dirname	cm_utils.cpp	/^char * my_dirname (char * path)$/;"	f
-name	NetHelper.h	/^		char	name[10];$/;"	m	struct:__anon9
-netmask	NetHelper.h	/^		unsigned int netmask;$/;"	m	struct:__anon9
-nothing	cmconfig.h	/^	char nothing[10];$/;"	m	struct:__anon7
-nret	cmconfig.h	/^	int 	 nret;		\/\/return value > 0 success else failed$/;"	m	struct:__anon3
+name	NetHelper.h	/^		char	name[10];$/;"	m	struct:__anon8
+netmask	NetHelper.h	/^		unsigned int netmask;$/;"	m	struct:__anon8
+nothing	cmconfig.h	/^	char nothing[10];$/;"	m	struct:__anon6
+nret	cmconfig.h	/^	int 	 nret;		\/\/return value > 0 success else failed$/;"	m	struct:__anon2
 nret	cmtkp.h	/^    ::Ice::Int nret;$/;"	m	struct:cmtkp::msghead
 operator !=	cmtkp.h	/^    bool operator!=(const CommandMessage& __rhs) const$/;"	f	struct:cmtkp::CommandMessage
 operator !=	cmtkp.h	/^    bool operator!=(const command& __rhs) const$/;"	f	struct:cmtkp::command
@@ -356,71 +342,66 @@ operator >=	cmtkp.h	/^    bool operator>=(const command& __rhs) const$/;"	f	stru
 operator >=	cmtkp.h	/^    bool operator>=(const magicmsg& __rhs) const$/;"	f	struct:cmtkp::magicmsg
 operator >=	cmtkp.h	/^    bool operator>=(const msghead& __rhs) const$/;"	f	struct:cmtkp::msghead
 operator >=	cmtkp.h	/^    bool operator>=(const response& __rhs) const$/;"	f	struct:cmtkp::response
-opt	cmconfig.h	/^	char opt[10];$/;"	m	struct:__anon8
-opt_help_t	cmconfig.h	/^}opt_help_t;$/;"	t	typeref:struct:__anon8
+opt	cmconfig.h	/^	char opt[10];$/;"	m	struct:__anon7
+opt_help_t	cmconfig.h	/^}opt_help_t;$/;"	t	typeref:struct:__anon7
 opt_list	cm_init.cpp	/^static opt_help_t opt_list [] =$/;"	v	file:
 optarg	getopt.cpp	/^char	*optarg;		\/* argument associated with option *\/$/;"	v
 opterr	getopt.cpp	/^int	opterr = 1,		\/* if error message should be printed *\/$/;"	v
 optind	getopt.cpp	/^optind = 1,		\/* index into parent argv vector *\/$/;"	v
 optopt	getopt.cpp	/^optopt,			\/* character checked for validity *\/$/;"	v
 optreset	getopt.cpp	/^optreset;		\/* reset getopt *\/$/;"	v
-over	cmconfig.h	/^	bool	 over;		\/\/is it run over ?$/;"	m	struct:__anon3
-over	cmconfig.h	/^	unsigned char		over;\/\/whether this thread run over ?$/;"	m	struct:__anon4
+over	cmconfig.h	/^	bool	 over;		\/\/is it run over ?$/;"	m	struct:__anon2
+over	cmconfig.h	/^	unsigned char		over;\/\/whether this thread run over ?$/;"	m	struct:__anon3
 pid	cmtkp.h	/^    ::Ice::Int pid;$/;"	m	struct:cmtkp::command
-port	cmconfig.h	/^	unsigned short 	port;$/;"	m	struct:__anon1
 port	cmtkp.h	/^    ::Ice::Int port;$/;"	m	struct:cmtkp::command
 print_thread_list	cm_thread.cpp	/^void print_thread_list(const thread_pool_t  * thread_pool)$/;"	f
 print_usage	cm_init.cpp	/^void print_usage(int argc, char* argv[])$/;"	f
-rand_num1	cmconfig.h	/^	int rand_num1;$/;"	m	struct:__anon7
+rand_num1	cmconfig.h	/^	int rand_num1;$/;"	m	struct:__anon6
 rcsid	getopt.cpp	/^static char *rcsid = "$Id: getopt.c,v 1.2 1998\/01\/21 22:27:05 billm Exp $";$/;"	v	file:
-remote_addr	cmconfig.h	/^	unsigned int	remote_addr;		\/\/same as above$/;"	m	struct:__anon2
-remote_file	cmconfig.h	/^	char		remote_file [CONF_DIR]; \/\/which to download$/;"	m	struct:__anon2
-remote_host_name	cmconfig.h	/^	char		remote_host_name[HOST_NAME];$/;"	m	struct:__anon2
-remote_port	cmconfig.h	/^	unsigned short 	remote_port;		\/\/which port to connect $/;"	m	struct:__anon2
+remote_addr	cmconfig.h	/^	unsigned int	remote_addr;		\/\/same as above$/;"	m	struct:__anon1
+remote_file	cmconfig.h	/^	char		remote_file [CONF_DIR]; \/\/which to download$/;"	m	struct:__anon1
+remote_host_name	cmconfig.h	/^	char		remote_host_name[HOST_NAME];$/;"	m	struct:__anon1
+remote_port	cmconfig.h	/^	unsigned short 	remote_port;		\/\/which port to connect $/;"	m	struct:__anon1
 remotefile	cmtkp.h	/^    ::std::string remotefile;$/;"	m	struct:cmtkp::msghead
 response	cmtkp.h	/^struct response$/;"	s	namespace:cmtkp
 result	cmtkp.h	/^    ::cmtkp::StringArray result;$/;"	m	struct:cmtkp::CommandMessage
-retmsg	cmconfig.h	/^	::cmtkp::StringArray retmsg;\/\/result of command$/;"	m	struct:__anon3
-run_mode	cmconfig.h	/^	char		run_mode;		\/\/1 for real time and 2 for background$/;"	m	struct:__anon2
+run_mode	cmconfig.h	/^	char		run_mode;		\/\/1 for real time and 2 for background$/;"	m	struct:__anon1
 runmode	cmtkp.h	/^    ::Ice::Int runmode;$/;"	m	struct:cmtkp::msghead
 section	IniHelper.h	/^struct section$/;"	s
 send_cmd2host	cm_function.cpp	/^int send_cmd2host (cmdev_t* dev, const cm_client_config_t * config)$/;"	f
 send_file2host	cm_function.cpp	/^int send_file2host (cmdev_t* dev, const cm_client_config_t * config)$/;"	f
-show	cmconfig.h	/^	unsigned char show;$/;"	m	struct:__anon8
+show	cmconfig.h	/^	unsigned char show;$/;"	m	struct:__anon7
 show_result	cm_result.cpp	/^void show_result (dev_list_t * devlist, const cm_client_config_t * config)$/;"	f
 show_result_obvious	cm_result.cpp	/^void show_result_obvious (dev_list_t * devlist, const cm_client_config_t * config)$/;"	f
 show_result_silent	cm_result.cpp	/^void show_result_silent (dev_list_t * devlist, const cm_client_config_t * config)$/;"	f
 show_version	cm_utils.cpp	/^int 	show_version (int argc, char* argv[])$/;"	f
-silent	cmconfig.h	/^	char		silent;			\/\/1 store result in files or print it to stdout$/;"	m	struct:__anon2
+silent	cmconfig.h	/^	char		silent;			\/\/1 store result in files or print it to stdout$/;"	m	struct:__anon1
 socklen_t	os_independent.h	/^typedef int socklen_t;$/;"	t
 srchost	cmtkp.h	/^    ::cmtkp::ipArray srchost;$/;"	m	struct:cmtkp::msghead
 start_tasks	cm_thread.cpp	/^int start_tasks(thread_pool_t  * thread_pool,  cm_client_config_t * config)$/;"	f
-start_time	cmconfig.h	/^	time_t		start_time; \/\/when it began run$/;"	m	struct:__anon4
-start_time	cmconfig.h	/^	time_t	start_time;	\/\/when it start to runing..$/;"	m	struct:__anon3
-stmode	cmtkp.h	/^    ::Ice::Long stmode;$/;"	m	struct:cmtkp::msghead
+start_time	cmconfig.h	/^	time_t		start_time; \/\/when it began run$/;"	m	struct:__anon3
+start_time	cmconfig.h	/^	time_t	start_time;	\/\/when it start to runing..$/;"	m	struct:__anon2
 strcasecmp	IniHelper.h	/^static int strcasecmp(const char *s1, const char *s2)$/;"	f
+stret	cmconfig.h	/^	::cmtkp::byteArray stret;$/;"	m	struct:__anon2
 strncasecmp	IniHelper.h	/^static int strncasecmp(const char *s1, const char *s2, size_t n)$/;"	f
 taskid	cmtkp.h	/^    ::Ice::Int taskid;$/;"	m	struct:cmtkp::msghead
-tasknum	cmconfig.h	/^	unsigned short	tasknum;		\/\/how many tasks are running$/;"	m	struct:__anon2
-th_num	cmconfig.h	/^	int	  th_num;\/\/thread number$/;"	m	struct:__anon5
-thread	cmconfig.h	/^	thread_t  thread[MAX_TASK_NUM]; \/\/thread list $/;"	m	struct:__anon5
-thread_pool_t	cmconfig.h	/^}thread_pool_t;$/;"	t	typeref:struct:__anon5
+tasknum	cmconfig.h	/^	unsigned short	tasknum;		\/\/how many tasks are running$/;"	m	struct:__anon1
+th_num	cmconfig.h	/^	int	  th_num;\/\/thread number$/;"	m	struct:__anon4
+thread	cmconfig.h	/^	thread_t  thread[MAX_TASK_NUM]; \/\/thread list $/;"	m	struct:__anon4
+thread_pool_t	cmconfig.h	/^}thread_pool_t;$/;"	t	typeref:struct:__anon4
 thread_run_over	cm_thread.cpp	/^unsigned char	thread_run_over(const  thread_pool_t * thread_pool)$/;"	f
-thread_t	cmconfig.h	/^}thread_t;$/;"	t	typeref:struct:__anon4
-threadnum	cmconfig.h	/^	unsigned short	threadnum;\/\/number of working threads$/;"	m	struct:__anon1
-tid	cmconfig.h	/^	int		tid;$/;"	m	struct:__anon4
-tid	cmconfig.h	/^	pthread_t 	tid; \/\/thread id or task id$/;"	m	struct:__anon4
-time_out	cmconfig.h	/^	unsigned int	time_out;		\/\/added @2011-05-18$/;"	m	struct:__anon2
+thread_t	cmconfig.h	/^}thread_t;$/;"	t	typeref:struct:__anon3
+tid	cmconfig.h	/^	int		tid;$/;"	m	struct:__anon3
+tid	cmconfig.h	/^	pthread_t 	tid; \/\/thread id or task id$/;"	m	struct:__anon3
+time_out	cmconfig.h	/^	unsigned int	time_out;		\/\/added @2011-05-18$/;"	m	struct:__anon1
 timestamp	cmtkp.h	/^    ::Ice::Long timestamp;$/;"	m	struct:cmtkp::msghead
 title	IniHelper.h	/^	char title[SEC_TITLE];$/;"	m	struct:section
 tt	os_independent.h	/^static int tt = 1;$/;"	v
 type	cmtkp.h	/^    ::Ice::Int type;$/;"	m	struct:cmtkp::magicmsg
-uid	cmtkp.h	/^    ::Ice::Int uid;$/;"	m	struct:cmtkp::msghead
 upCast	cmtkp.cpp	/^::Ice::Object* IceInternal::upCast(::cmtkp::CmdMessageHandler* p) { return p; }$/;"	f	class:IceInternal
 upCast	cmtkp.cpp	/^::IceProxy::Ice::Object* IceInternal::upCast(::IceProxy::cmtkp::CmdMessageHandler* p) { return p; }$/;"	f	class:IceInternal
-user	cmconfig.h	/^	char 	user[64];$/;"	m	struct:__anon7
-username	cmconfig.h	/^	char 		username[USER_NAME];$/;"	m	struct:__anon2
-username	cmtkp.h	/^    ::std::string username;$/;"	m	struct:cmtkp::msghead
+user	cmconfig.h	/^	char 	user[64];$/;"	m	struct:__anon6
+username	cmconfig.h	/^	char 		username[USER_NAME];$/;"	m	struct:__anon1
 var_entry	IniHelper.h	/^struct var_entry$/;"	s
 var_name	IniHelper.h	/^	char var_name[VAR_NAME];$/;"	m	struct:var_entry
 var_value	IniHelper.h	/^	char var_value[VAR_VAL];$/;"	m	struct:var_entry

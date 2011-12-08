@@ -7,7 +7,6 @@
 #define DFT_THREAD 10
 #define DEV_TYPE_CMD 1
 #define DEV_TYPE_STAT 2
-#define CM_IP_LIST	"/etc/cmserver.lst"
 #define CMTK_CONF	"/etc/cmtk/cmtk_config.ini"
 #define CONF_FILE 128 //config file name length
 #define CONF_DIR 128 //directory name length

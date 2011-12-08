@@ -11,16 +11,4 @@
 #define RET_RUNCMD_FAILED -2
 #define RET_SUCCES 1
 #define RET_DIR "result"
-#define INFO_DIR "/usr/local/cmserver/info"
-#define DFT_LOGIN "none"
-/*
-enum CMD_TYPE
-{
-	CMD_TYPE_NOTIFY = 1,
-	CMD_TYPE_CONF = 2
-};
-*/
-
-
-//static const char* str_msg_type[] = {"unkonw message type", "stat", "command", "file"};
 #endif
