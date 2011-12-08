@@ -39,7 +39,7 @@ int send_cmd2host (cmdev_t* dev, const cm_client_config_t * config)
 		msg.head.timestamp	=	time(0);
 		msg.head.taskid		= 	GETPID;	
 		msg.head.commandid	=	time(0);
-		msg.head.localaddr	=	dev->dev_ip;
+		//msg.head.localaddr	=	dev->dev_ip;
 		msg.head.runmode	=	config->run_mode;//added by djg@2011-03-09
 		msg.cmd 		= 	config->command; // get file name
 		//msg.head.username	=	g_client_config.username;
@@ -130,7 +130,7 @@ int send_file2host (cmdev_t* dev, const cm_client_config_t * config)
 		config->file_msg->head.timestamp	=	time(0);
 		config->file_msg->head.taskid		= 	getpid();	
 		config->file_msg->head.commandid	=	time(0);
-		config->file_msg->head.localaddr	=	dev->dev_ip;
+		//config->file_msg->head.localaddr	=	dev->dev_ip;
 		char index[20] = {0};
 		sprintf (index, "%lu", dev->dev_index);
 		config->file_msg->head.index = string (index);		
@@ -210,7 +210,7 @@ int fetch_file_from_host (cmdev_t *dev, const cm_client_config_t * config)
 		g_fetch_msg.head.timestamp	=	time(0);
 		g_fetch_msg.head.taskid		= 	GETPID;	
 		g_fetch_msg.head.commandid	=	time(0);
-		g_fetch_msg.head.localaddr	=	dev->dev_ip;
+		//g_fetch_msg.head.localaddr	=	dev->dev_ip;
 		
 		
 		sprintf (index, "%lu", dev->dev_index);

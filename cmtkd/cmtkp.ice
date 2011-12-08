@@ -17,7 +17,7 @@ module cmtkp
 		int 		msgtype;	//消息类型
 		long		commandid;	//命令ID，用于反馈识别
 		long		timestamp;	//创建时间
-		long		localaddr;
+		//long		localaddr;
 		//added by djg@2011-03-08 --start
 		string		file;
 		string		dstfile;
@@ -25,16 +25,6 @@ module cmtkp
 		long		filesize;
 		int		nret;
 		int		runmode;//1 real-time 2 background
-		long		stmode; //file mode
-		int		uid; //uid
-		int		gid; //gid
-		//added by djg@2011-03-08 --end
-		//added by djg@2011-08-01--start
-		string username;
-		string login;
-		//added by djg@2011-08-01--end
-
-		//added by duanjigang1983@2011-11-01 start
 		string remotefile;
 		string localfile;
 		//added by duanjigang1983@2011-11-01 finish

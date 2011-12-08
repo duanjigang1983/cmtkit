@@ -562,9 +562,9 @@ int load_file2msg(char * szfile)
 	close (nFd);
 	g_file_msg.head.filesize 	= size;
 	//---added by djg@2011-03-11 --start
-	g_file_msg.head.stmode		= file_stat.st_mode;
-	g_file_msg.head.uid		= file_stat.st_uid;
-	g_file_msg.head.gid		= file_stat.st_gid;
+	//g_file_msg.head.stmode		= file_stat.st_mode;
+	//g_file_msg.head.uid		= file_stat.st_uid;
+	//g_file_msg.head.gid		= file_stat.st_gid;
 	//---added by djg@2011-03-11 --end
 	sprintf (base, "%s", basename(szfile));	
 	g_file_msg.head.file 		= string (base);
@@ -572,8 +572,8 @@ int load_file2msg(char * szfile)
 	g_file_msg.head.msgtype 	= MSG_TYPE_UP_FILE;
 
 	//--added by duanjigang@2011-08-01 for login and user auth --start
-	g_file_msg.head.username = string (g_client_config.username);	
-	g_file_msg.head.login = string (g_client_config.login);	
+	//g_file_msg.head.username = string (g_client_config.username);	
+	//g_file_msg.head.login = string (g_client_config.login);	
 	//--added by duanjigang@2011-08-01 for login and user auth --end
 
 
@@ -767,16 +767,16 @@ int send_cmd2host (cmdev_t* dev)
 		}
 		connected 		=	true;
 		msg.head.msgtype 	= 	MSG_TYPE_CMD;
-		msg.head.hostaddr 	= 	g_client_config.local_addr;
-		msg.head.hostport 	= 	g_client_config.local_port;
+		//msg.head.hostaddr 	= 	g_client_config.local_addr;
+		//msg.head.hostport 	= 	g_client_config.local_port;
 		msg.head.timestamp	=	time(0);
 		msg.head.taskid		= 	getpid();	
 		msg.head.commandid	=	g_command_id;
-		msg.head.localaddr	=	dev->dev_ip;
+		//msg.head.localaddr	=	dev->dev_ip;
 		msg.head.runmode	=	g_client_config.run_mode;//added by djg@2011-03-09
 		msg.cmd 		= 	g_client_config.command; // get file name
-		msg.head.username	=	g_client_config.username;
-		msg.head.login		=	g_client_config.login;
+		//msg.head.username	=	g_client_config.username;
+		//msg.head.login		=	g_client_config.login;
 		//printf ("command is [%s]\n", g_client_config.command);
 		
 		// try to request the file
@@ -863,7 +863,7 @@ int send_file2host (cmdev_t * dev)
 		g_file_msg.head.timestamp	=	time(0);
 		g_file_msg.head.taskid		= 	getpid();	
 		g_file_msg.head.commandid	=	g_command_id;
-		g_file_msg.head.localaddr	=	dev->dev_ip;
+		//g_file_msg.head.localaddr	=	dev->dev_ip;
 		char index[20] = {0};
 		sprintf (index, "%lu", dev->dev_index);
 		g_file_msg.head.index = string (index);		
@@ -1163,10 +1163,10 @@ int fetch_file_from_host (cmdev_t *dev)
 		g_fetch_msg.head.timestamp	=	time(0);
 		g_fetch_msg.head.taskid		= 	getpid();	
 		g_fetch_msg.head.commandid	=	g_command_id;
-		g_fetch_msg.head.localaddr	=	dev->dev_ip;
+		//g_fetch_msg.head.localaddr	=	dev->dev_ip;
 
-		g_fetch_msg.head.username = string (g_client_config.username);	
-		g_fetch_msg.head.login = string (g_client_config.login);	
+		//g_fetch_msg.head.username = string (g_client_config.username);	
+		//g_fetch_msg.head.login = string (g_client_config.login);	
 
 		char index[20] = {0};
 		sprintf (index, "%lu", dev->dev_index);

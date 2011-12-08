@@ -101,18 +101,12 @@ struct msghead
     ::Ice::Int msgtype;
     ::Ice::Long commandid;
     ::Ice::Long timestamp;
-    ::Ice::Long localaddr;
     ::std::string file;
     ::std::string dstfile;
     ::std::string filemd5;
     ::Ice::Long filesize;
     ::Ice::Int nret;
     ::Ice::Int runmode;
-    ::Ice::Long stmode;
-    ::Ice::Int uid;
-    ::Ice::Int gid;
-    ::std::string username;
-    ::std::string login;
     ::std::string remotefile;
     ::std::string localfile;
 

@@ -158,5 +158,6 @@ int 	show_version 	(int argc, char* argv[])
 	printf ("\tv1.1 2011-11-02:adding interface of file fetching by duanjigang1983\n");
 	printf ("\tv1.2 2011-11-25:adding limited command support  by duanjigang1983\n");
 	printf ("\tv1.3 2011-11-27:releas new version  by duanjigang1983\n");
+	printf ("\tv1.4 2011-12--08:moding define of message  by duanjigang1983\n");
 	return 1;
 }

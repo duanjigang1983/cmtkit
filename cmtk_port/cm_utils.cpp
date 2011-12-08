@@ -64,6 +64,7 @@ int 	show_version (int argc, char* argv[])
 	printf ("\t v1.0 2011-10-29:create version by duanjigang1983\n");
 	printf ("\t v1.1 2011-11-02:adding file fetching interface by duanjigang1983\n");
 	printf ("\t v1.2 2011-11-26:simplify source code by duanjigang1983\n");
+	printf ("\t v1.3 2011-12-08:porting to windows by duanjiang1983\n");
 	return 0;;
 }
 

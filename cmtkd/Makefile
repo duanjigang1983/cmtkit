@@ -1,7 +1,8 @@
 #CFLAG=-c -Wall  -I/usr/local/include  -ftemplate-depth-128 -I./ -D__LINUX__ -g
 CFLAG=-c -Wall -I./ -D__LINUX__ -g -I/usr/local/Ice-3.3.1/include
 SERVER_OBJS=MessageHandler.o cmtkp.o cmutils.o syslog_utils.o IniHelper.o NetHelper.o cm_utils.o host_tree.o cm_plugin.o
-DFLAG=-lIce -lIceUtil -lpthread -L/usr/local/Ice-3.3.1/lib
+#DFLAG=-lIce -lIceUtil -lpthread -L/usr/local/Ice-3.3.1/lib
+DFLAG=-L /usr/lib/nptl -lIce -lIceUtil -lpthread  -lrt  -L/usr/local/Ice-3.3.1/lib
 CC=c++
 OBJS=cmtkd
 default:

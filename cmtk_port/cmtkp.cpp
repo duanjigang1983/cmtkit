@@ -10,7 +10,7 @@
 // Ice version 3.3.1
 // Generated from file `cmtkp.ice'
 
-#include "cmtkp.h"
+#include <cmtkp.h>
 #include <Ice/LocalException.h>
 #include <Ice/ObjectFactory.h>
 #include <Ice/BasicStream.h>
@@ -124,10 +124,6 @@ cmtkp::msghead::operator==(const msghead& __rhs) const
     {
         return false;
     }
-    if(localaddr != __rhs.localaddr)
-    {
-        return false;
-    }
     if(file != __rhs.file)
     {
         return false;
@@ -149,26 +145,6 @@ cmtkp::msghead::operator==(const msghead& __rhs) const
         return false;
     }
     if(runmode != __rhs.runmode)
-    {
-        return false;
-    }
-    if(stmode != __rhs.stmode)
-    {
-        return false;
-    }
-    if(uid != __rhs.uid)
-    {
-        return false;
-    }
-    if(gid != __rhs.gid)
-    {
-        return false;
-    }
-    if(username != __rhs.username)
-    {
-        return false;
-    }
-    if(login != __rhs.login)
     {
         return false;
     }
@@ -254,14 +230,6 @@ cmtkp::msghead::operator<(const msghead& __rhs) const
     {
         return false;
     }
-    if(localaddr < __rhs.localaddr)
-    {
-        return true;
-    }
-    else if(__rhs.localaddr < localaddr)
-    {
-        return false;
-    }
     if(file < __rhs.file)
     {
         return true;
@@ -310,46 +278,6 @@ cmtkp::msghead::operator<(const msghead& __rhs) const
     {
         return false;
     }
-    if(stmode < __rhs.stmode)
-    {
-        return true;
-    }
-    else if(__rhs.stmode < stmode)
-    {
-        return false;
-    }
-    if(uid < __rhs.uid)
-    {
-        return true;
-    }
-    else if(__rhs.uid < uid)
-    {
-        return false;
-    }
-    if(gid < __rhs.gid)
-    {
-        return true;
-    }
-    else if(__rhs.gid < gid)
-    {
-        return false;
-    }
-    if(username < __rhs.username)
-    {
-        return true;
-    }
-    else if(__rhs.username < username)
-    {
-        return false;
-    }
-    if(login < __rhs.login)
-    {
-        return true;
-    }
-    else if(__rhs.login < login)
-    {
-        return false;
-    }
     if(remotefile < __rhs.remotefile)
     {
         return true;
@@ -387,18 +315,12 @@ cmtkp::msghead::__write(::IceInternal::BasicStream* __os) const
     __os->write(msgtype);
     __os->write(commandid);
     __os->write(timestamp);
-    __os->write(localaddr);
     __os->write(file);
     __os->write(dstfile);
     __os->write(filemd5);
     __os->write(filesize);
     __os->write(nret);
     __os->write(runmode);
-    __os->write(stmode);
-    __os->write(uid);
-    __os->write(gid);
-    __os->write(username);
-    __os->write(login);
     __os->write(remotefile);
     __os->write(localfile);
 }
@@ -414,18 +336,12 @@ cmtkp::msghead::__read(::IceInternal::BasicStream* __is)
     __is->read(msgtype);
     __is->read(commandid);
     __is->read(timestamp);
-    __is->read(localaddr);
     __is->read(file);
     __is->read(dstfile);
     __is->read(filemd5);
     __is->read(filesize);
     __is->read(nret);
     __is->read(runmode);
-    __is->read(stmode);
-    __is->read(uid);
-    __is->read(gid);
-    __is->read(username);
-    __is->read(login);
     __is->read(remotefile);
     __is->read(localfile);
 }

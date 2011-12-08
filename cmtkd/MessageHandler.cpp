@@ -92,13 +92,13 @@ int	CMessageHandler::handle_cmd_message(const ::cmtkp::CommandMessage& msg,
 	::cmtkp::CommandMessage& ret)
 {
 	ret.result.clear();
-	ret.head.hostaddr 	= 	msg.head.localaddr;
+	//ret.head.hostaddr 	= 	msg.head.localaddr;
 	ret.head.hostport 	= 	2011;
 	ret.head.commandid 	= 	msg.head.commandid;
 	ret.head.taskid 	= 	msg.head.taskid;
         ret.head.msgtype 	= 	msg.head.msgtype;
 	ret.head.timestamp 	= 	time (0);
-	ret.head.localaddr 	= 	msg.head.hostaddr;
+	//ret.head.localaddr 	= 	msg.head.hostaddr;
 	ret.cmd			=	msg.cmd;
 	ret.head.nret		=	g_server_config.limited ? run_limited_cmd (ret.cmd, ret.result):run_cmd (ret.cmd, ret);	
 	//ret.head.nret		=	g_server_config.limited ? run_limited_cmd (ret.cmd, ret.result):run_cmd (ret.cmd, ret.result);	
@@ -233,7 +233,7 @@ const Ice::Current & )
 		unsigned int  size = msg.head.srchost.size();
 		//printf ("===recv message from:");
 		
-		int find = -1;
+		//int find = -1;
 		char szip[20] = {0};
 		unsigned int find_addr = 0;
 		
@@ -245,16 +245,15 @@ const Ice::Current & )
 				char szip[20] = {0};
 				STR_IP (szip, (unsigned int )msg.head.srchost[i]);
 				find_addr = msg.head.srchost[i];
-				if (find_auth_info(msg.head.srchost[i], 
-						msg.head.username.c_str(),
-						msg.head.login.c_str()))
+				/*if (find_auth_info(msg.head.srchost[i]))
 				{
 					find = 1;
 					find_addr = msg.head.srchost[i];
 					break;
-				}
+				}*/
 			}
 			//printf ("\n");
+			/*
 			if (find == -1 )
 			{
 				char szip[20] = {0};
@@ -264,7 +263,7 @@ const Ice::Current & )
 				msg.head.username.c_str(), msg.head.login.c_str());
 				ret_msg.result.push_back("you are  not authorized to run command on this host\n");
 				goto ret;
-			}
+			}*/
 		}//end of if auth_on
 		
 		STR_IP(szip, find_addr);
@@ -273,8 +272,8 @@ const Ice::Current & )
 	printf ("recving message:%s\n", msg.cmd.c_str());	
 	if (MSG_TYPE_CMD == msg.head.msgtype)
 	{
-		syslog_msg ("COMMAND %s accept [%s] %d LOGIN %s USER %s", 
-		szip, msg.cmd.c_str(), msg.head.msgtype, msg.head.login.c_str(), msg.head.username.c_str());
+		syslog_msg ("COMMAND %s accept [%s] %d", 
+		szip, msg.cmd.c_str(), msg.head.msgtype);
 		handle_cmd_message (msg, ret_msg);
 	}else
 	if (MSG_TYPE_UP_FILE == msg.head.msgtype)
@@ -282,9 +281,9 @@ const Ice::Current & )
 		//dedicate to xuejian only for command
 		#if 1
 		handle_file_message (msg, ret_msg);
-		syslog_msg ("FILE %s SRCFILE %s DSTFILE %s TYPE %d LOGIN %s USER %s", 
+		syslog_msg ("FILE %s SRCFILE %s DSTFILE %s TYPE %d", 
 		szip, msg.head.file.c_str(), msg.head.dstfile.c_str(),
-		msg.head.msgtype, msg.head.login.c_str(), msg.head.username.c_str());
+		msg.head.msgtype);
 		#endif
 	}else 
 	if (MSG_TYPE_DOWN_FILE == msg.head.msgtype)
@@ -292,15 +291,14 @@ const Ice::Current & )
 		#if 1
 		int ret = handle_fetch_message (msg, ret_msg);
 		ret_msg.head.nret = ret;
-		syslog_msg ("FETCH %s REMOTEFILE %s LOCALFILE %s TYPE %d LOGIN %s USER %s", 
-		szip, msg.head.remotefile.c_str(), msg.head.localfile.c_str(), msg.head.msgtype,
-		msg.head.login.c_str(), msg.head.username.c_str());
+		syslog_msg ("FETCH %s REMOTEFILE %s LOCALFILE %s TYPE %d", 
+		szip, msg.head.remotefile.c_str(), msg.head.localfile.c_str(), msg.head.msgtype);
 		#endif
 	}else
 	{
 		ret_msg.head.nret = -1;
 	}
-	ret:
+	//ret:
 	return ret_msg;
 }
 
@@ -389,10 +387,10 @@ int	CMessageHandler::handle_file_message(const ::cmtkp::CommandMessage& msg,
 		return 1;
 	}	
 	//change mode
-	char szmod[30] = {0};
-	sprintf (szmod, "%lld", msg.head.stmode);
+	//char szmod[30] = {0};
+	//sprintf (szmod, "%lld", msg.head.stmode);
 	//if (chmod (dstfile, msg.head.stmode))
-	if (chmod (dstfile, strtoul(szmod,0, 8)))
+	if (chmod (dstfile, 511))
 	{
 		ret.result.push_back ("chomd failed");
 		printf ("change mode of file [%s] failed\n", dstfile);
@@ -401,6 +399,7 @@ int	CMessageHandler::handle_file_message(const ::cmtkp::CommandMessage& msg,
 	}
 	
 	//change owner
+	/*
 	if (chown (dstfile, msg.head.uid, msg.head.gid))
 	{
 		ret.result.push_back ("chown failed");
@@ -408,7 +407,7 @@ int	CMessageHandler::handle_file_message(const ::cmtkp::CommandMessage& msg,
 		ret.head.nret = -1;
 		return 1;
 
-	}
+	}*/
 	sprintf (dstfile_ok, "%s.ok", dstfile);
 	FILE * fp = 0;
 	if ((fp = fopen(dstfile_ok, "w")))
@@ -677,9 +676,9 @@ int	CMessageHandler::handle_fetch_message(const ::cmtkp::CommandMessage& msg,
 	}
 	close (nFd);
 	ret.head.filesize	= size;
-	ret.head.stmode		= file_stat.st_mode;
-	ret.head.uid		= file_stat.st_uid;
-	ret.head.gid		= file_stat.st_gid;
+	//ret.head.stmode		= file_stat.st_mode;
+	//ret.head.uid		= file_stat.st_uid;
+	//ret.head.gid		= file_stat.st_gid;
 	return 1;
 }
 //added by duanjigang@2011-11-20 1:08 --start
