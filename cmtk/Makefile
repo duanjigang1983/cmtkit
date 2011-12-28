@@ -1,17 +1,23 @@
 #CFLAG=-c -Wall  -I/usr/local/include  -ftemplate-depth-128 -I./ -D__LINUX__ -g -I/usr/local/Ice
 CFLAG=-c -Wall -I./ -D__LINUX__ -g -I/usr/local/Ice-3.3.1/include
-CLI_OBJS=cmtkp.o utils.o NetHelper.o syslog_utils.o  cm_utils.o IniHelper.o
-DFLAG=-lIce -lIceUtil -lpthread -L/usr/local/Ice-3.3.1/lib
+CLI_OBJS=*.o
+#DFLAG=-lIce -lIceUtil -lpthread -L/usr/local/Ice-3.3.1/lib
+DFLAG=-L/lib/nptl -lrt -lIce -lIceUtil -lpthread -L/usr/local/Ice-3.3.1/lib
 CC=c++
 default:
-	$(CC) $(CFLAG)   cmtk.cpp
-	$(CC) $(CFLAG)   utils.cpp
+	$(CC) $(CFLAG)   cm_function.cpp
+	$(CC) $(CFLAG)   cm_init.cpp
+	$(CC) $(CFLAG)   cm_init_dev.cpp
+	$(CC) $(CFLAG)   cm_init_task.cpp
+	$(CC) $(CFLAG)   cm_result.cpp
+	$(CC) $(CFLAG)   cm_thread.cpp
 	$(CC) $(CFLAG)   cmtkp.cpp
-	$(CC) $(CFLAG)   syslog_utils.cpp
-	$(CC) $(CFLAG)   NetHelper.cpp
-	$(CC) $(CFLAG)   IniHelper.cpp
 	$(CC) $(CFLAG)   cm_utils.cpp
-	$(CC) -o cmtk cmtk.o $(CLI_OBJS) $(DFLAG)    
+	$(CC) $(CFLAG)   getopt.cpp
+	$(CC) $(CFLAG)   IniHelper.cpp
+	$(CC) $(CFLAG)   main.cpp
+	$(CC) $(CFLAG)   NetHelper.cpp
+	$(CC) -o cmtk  $(CLI_OBJS) $(DFLAG)    
 clean:
 	rm *.o  cmtk 
 

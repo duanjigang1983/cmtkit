@@ -522,6 +522,7 @@ int32_t makeargv(const char *s, char ***argvp)
         			*pnext++ = *pch;
         		break;
     		}
+		*pnext = '\0';
   	}
 
 	if (quote) 

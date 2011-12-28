@@ -17,8 +17,6 @@ module cmtkp
 		int 		msgtype;	//消息类型
 		long		commandid;	//命令ID，用于反馈识别
 		long		timestamp;	//创建时间
-		//long		localaddr;
-		//added by djg@2011-03-08 --start
 		string		file;
 		string		dstfile;
 		string		filemd5;
@@ -27,7 +25,6 @@ module cmtkp
 		int		runmode;//1 real-time 2 background
 		string remotefile;
 		string localfile;
-		//added by duanjigang1983@2011-11-01 finish
 	};
 	struct CommandMessage
 	{

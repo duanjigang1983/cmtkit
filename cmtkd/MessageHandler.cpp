@@ -642,7 +642,7 @@ int	CMessageHandler::handle_fetch_message(const ::cmtkp::CommandMessage& msg,
 
 	}
 
-	if (file_stat.st_size > 5000000 )
+	if (file_stat.st_size > 10000000 )
 	{
 		sprintf (szmsg, "remote file too large '%ld(KB)'", file_stat.st_size/1024);
 		ret.result.push_back (szmsg);

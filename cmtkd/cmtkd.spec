@@ -1,6 +1,6 @@
 %define orgniname cmtkitd
-%define version 1.1.1
-%define unmangled_version 1.1.1
+%define version 1.1.2
+%define unmangled_version 1.1.2
 %define	_prefix /usr
 %define release 1.el5
 
