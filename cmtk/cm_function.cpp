@@ -243,19 +243,19 @@ ret:
 		char szfile [256] = {0};
 		int nFd = 0;
 		sprintf (szdir, "%s", g_fetch_msg.head.localfile.c_str());
-		//printf ("%s:%d------------------\n", __FILE__, __LINE__);
 		sprintf (szfile, "%s", my_dirname (szdir));
-		//printf ("%s:%d------------------\n", __FILE__, __LINE__);
 	
-		///mkdir_rec (my_dirname(szfile));
 		memset (szfile, 0, 256);
 		sprintf (szfile, "%s.%s", g_fetch_msg.head.localfile.c_str(), dev->dev_name);
-		//printf ("open file '%s'-%ld-%d\n", szfile, ret_msg.filedata.size(), ret_msg.head.nret);
+		
 		//open file for write 
 		nFd = open (szfile, O_WRONLY | O_CREAT | O_TRUNC);
 		if (nFd == -1)
 		{
-			ret_msg.result.push_back (string("open file '")+string(szfile)+"' for write failed");
+			char szbuf[128] = {0};
+			sprintf (szbuf, "open file '%s' for write failed\n", szfile);
+			for (unsigned int i = 0; i < strlen(szbuf); i++ )
+			ret_msg.result.push_back (szbuf[i]);
 			ret_msg.head.nret = -1;
 			nRet = -1;
 		}else
@@ -283,8 +283,6 @@ ret:
 			chown  (szfile, 0, 0);
 #endif
 		}
-		//printf ("fetching file '%s' success,size %ld, dest name '%s'\n", 
-		//g_fetch_msg.head.remotefile.c_str(), ret_msg.head.filesize, g_fetch_msg.head.localfile.c_str());
 	}
 	return nRet;
 }

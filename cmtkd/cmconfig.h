@@ -125,5 +125,10 @@ typedef struct
 
 char*	get_conf(const char* path, const char* dft);
 extern int 	mkdir_rec(const char* path);
+extern void free_makeargv(char **argv);
+extern int32_t get_userid (const char* name, uid_t * uid);
+extern int32_t makeargv(const char *s, char ***argvp);
+extern char * find_bin (const char* name);
+
 #define TASK_POOL_SIZE 200 //size of task pool
 #endif

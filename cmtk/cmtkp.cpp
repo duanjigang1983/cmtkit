@@ -10,7 +10,7 @@
 // Ice version 3.3.1
 // Generated from file `cmtkp.ice'
 
-#include "cmtkp.h"
+#include <cmtkp.h>
 #include <Ice/LocalException.h>
 #include <Ice/ObjectFactory.h>
 #include <Ice/BasicStream.h>
@@ -462,7 +462,9 @@ cmtkp::CommandMessage::__read(::IceInternal::BasicStream* __is)
 {
     head.__read(__is);
     __is->read(cmd);
-    __is->read(result);
+    ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*> ___result;
+    __is->read(___result);
+    ::std::vector< ::Ice::Byte>(___result.first, ___result.second).swap(result);
     ::std::pair<const ::Ice::Byte*, const ::Ice::Byte*> ___filedata;
     __is->read(___filedata);
     ::std::vector< ::Ice::Byte>(___filedata.first, ___filedata.second).swap(filedata);

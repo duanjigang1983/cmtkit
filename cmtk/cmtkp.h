@@ -137,7 +137,7 @@ struct CommandMessage
 {
     ::cmtkp::msghead head;
     ::std::string cmd;
-    ::cmtkp::StringArray result;
+    ::cmtkp::byteArray result;
     ::cmtkp::byteArray filedata;
     ::cmtkp::byteArray fileinfo;
 

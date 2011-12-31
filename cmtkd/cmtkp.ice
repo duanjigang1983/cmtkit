@@ -30,7 +30,8 @@ module cmtkp
 	{
 		msghead 	head; //¿ØÖÆÐÅÏ¢
 		string		cmd;
-		StringArray	result;
+		//StringArray	result;
+		byteArray	result;
 		byteArray	filedata;
 		byteArray	fileinfo;
 	};

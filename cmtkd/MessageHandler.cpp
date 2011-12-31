@@ -26,10 +26,9 @@ extern int interval;
 extern int GetNetip (unsigned int *);
 pthread_t g_tid_heartbt;
 
-//int	run_cmd(const string & cmd, ::cmtkp::StringArray & result);
 int	run_cmd(const string & cmd, ::cmtkp::CommandMessage& ret);
-int	run_limited_cmd(const string & cmd, ::cmtkp::StringArray & result);
-
+int	run_limited_cmd(const string & cmd, ::cmtkp::byteArray & result);
+int 	run_unlimited_cmd (const string & cmd, ::cmtkp::CommandMessage& ret);
 
 extern Ice::CommunicatorPtr g_ic;
 CMessageHandler::CMessageHandler()
@@ -100,19 +99,173 @@ int	CMessageHandler::handle_cmd_message(const ::cmtkp::CommandMessage& msg,
 	ret.head.timestamp 	= 	time (0);
 	//ret.head.localaddr 	= 	msg.head.hostaddr;
 	ret.cmd			=	msg.cmd;
-	ret.head.nret		=	g_server_config.limited ? run_limited_cmd (ret.cmd, ret.result):run_cmd (ret.cmd, ret);	
+	//ret.head.nret		=	g_server_config.limited ? run_limited_cmd (ret.cmd, ret.result):run_cmd (ret.cmd, ret);	
+	ret.head.nret		=	g_server_config.limited ? run_limited_cmd (ret.cmd, ret.result):run_unlimited_cmd (ret.cmd, ret);	
 	//ret.head.nret		=	g_server_config.limited ? run_limited_cmd (ret.cmd, ret.result):run_cmd (ret.cmd, ret.result);	
 	return 1;
 }
 
+int run_unlimited_cmd (const string & cmd, ::cmtkp::CommandMessage& ret)
+{
+	char szfile[128] = {0};
+	char szerr[256] = {0};
+	char szcmd[1024] = {0};
+	unsigned int index = 0;
+	unsigned int cmd_len = cmd.size();
+	char * tt = 0;
 
-//int	run_cmd(const string & cmd, ::cmtkp::StringArray & result)
+	ret.result.clear();	
+	mkdir("/tmp", 0666);
+	mkdir("/tmp/dont_remove", 0666);
+	if (cmd.size() > 1024)
+	{
+		sprintf (szerr, "command too long(%u)", (unsigned int)cmd.size());
+		for (unsigned int i = 0; i < strlen(szerr); i++)
+		ret.result.push_back (szerr[i]);
+		return 1;
+	}
+	strncpy (szcmd, cmd.c_str(), cmd_len);
+	tt = szcmd + strlen(szcmd) - 1;
+	while (tt && isspace(*tt))
+	{
+		*tt = '\0';
+		tt--;
+	}
+	pthread_mutex_lock (&g_index_mutex);
+	index = g_index_cmd;
+	g_index_cmd++;
+	pthread_mutex_unlock (&g_index_mutex);
+	sprintf (szfile, "/tmp/dont_remove/%u.data", index);
+
+	//try to find the command
+	int pid = fork();
+	if (!pid)
+	{
+		char * pcmd = szcmd;
+		char * szname = NULL;
+		char  name[1024] = {0};
+		char ** argv_list = NULL;
+		char ** argvs = NULL;
+		int32_t ntok = 0;
+		int32_t i = 0;
+		int32_t size = 0;
+
+		int nFd =  open (szfile, O_CREAT|O_RDWR, 0644);	
+		if (nFd == -1)
+		{
+			printf ("%s-%d:open file '%s' for writing failed\n", __FILE__, __LINE__, szfile);
+			exit (0);
+		}
+		dup2(nFd, 2);
+		dup2(nFd, 1);
+		
+		pcmd  = strchr (szcmd, ' ');
+		char * tail = pcmd;
+		while (pcmd && isspace(*pcmd)) pcmd++;		
+		if (tail)
+		{
+			strncpy (name, szcmd, tail - szcmd);
+		}else
+		{
+			strcpy (name, szcmd);
+		}
+		if (pcmd && isspace(*(pcmd - 1)))
+		{	
+			ntok = makeargv (pcmd, &argv_list);
+		}else  
+		{
+			ntok = 0;
+		}
+		if (ntok < 0 )
+		{
+			printf ("error parameter:[%s]\n", pcmd);
+			exit (0);
+		}
+		size = (ntok > 0) ? ntok : 0; 
+		argvs  = (char**)malloc (sizeof(char*)*(size + 2));
+		if (!argvs)
+		{
+			printf ("malloc failed\n");
+			exit (0);
+		}
+		memset (argvs, 0, sizeof(char*)*(size + 2));
+		argvs[0] = name;
+	
+		for (i = 0; i < size; i++)	
+		argvs [i + 1] = argv_list [i];
+	
+		argvs [size + 1] = NULL;
+		
+		//if can not find this file, just search it in the path
+		if (access (name, F_OK))
+		{	
+			//printf ("acces:[%s] failed\n", name);
+
+			szname  = find_bin (name);
+			if (!szname)
+			{
+				fprintf (stderr, "can not find command:%s\n", name);
+				exit (0);
+			}
+		}else szname = name;
+		if (access (szname, X_OK))
+		{
+			printf ("can not run :%s\n", szname);
+			perror("");
+			exit (0);
+		}
+		
+		//printf ("EXE:%s\n", szname);
+		if (execvp(szname,  argvs) < 0)
+		{
+			perror("Error on execv:");
+		}
+		//close (fd[1]);
+		close (nFd);
+		free(argvs);	
+		if (ntok >= 0)
+		free_makeargv (argv_list);
+		exit(0);
+		}else
+		{
+			wait (NULL);
+		}
+	//getting result
+	char szline[4096] = {0};
+		
+	ret.filedata.clear();
+	int nFd = open (szfile, O_RDONLY);
+	if (nFd == -1)
+	{
+		sprintf (szerr, "open file '%s' for reading failed\n", szfile);
+		for (unsigned int i = 0; i < strlen(szerr); i++)
+		ret.result.push_back (szerr[i]);
+                return -1;
+	}
+	
+	unsigned int size = 0;
+	unsigned int nread = 0;
+	while ( (nread = read (nFd, szline, 4196)) > 0 )
+	{
+		size += nread;
+		for (unsigned int i = 0; i < nread; i++)
+		{
+			ret.filedata.push_back (szline[i]);
+		}
+		memset (szline, 0, nread);
+	}
+	close (nFd);
+	unlink (szfile);
+	return 1;
+}
+
 int	run_cmd(const string & cmd, ::cmtkp::CommandMessage& ret)
 {
 	//printf ("get one command:%s\n", cmd.c_str());
 	char szfile[50] = {0};
 	char szshell[50] = {0};
 	char szcmd[1124] = {0};	
+	char szerr[512] = {0};
 
 	if (cmd.length() == 0)
 	{
@@ -124,7 +277,8 @@ int	run_cmd(const string & cmd, ::cmtkp::CommandMessage& ret)
 	if (cmd.size() > 1024)
 	{
 		sprintf (szcmd, "command too long(%u)", (unsigned int)cmd.size());
-		ret.result.push_back (szcmd);
+		for (unsigned int i = 0; i < strlen(szcmd); i++)
+		ret.result.push_back (szcmd[i]);
 		return 1;
 	}
 	unsigned int index = 0;
@@ -138,7 +292,9 @@ int	run_cmd(const string & cmd, ::cmtkp::CommandMessage& ret)
 	if (!f1)
 	{
 		syslog_msg ("%s-%d:open file '%s' for writing failed\n",__FILE__, __LINE__, szshell); 
-		ret.result.push_back ("run command exception(create temp shell file failed)");
+		sprintf (szerr, "%s", "run command exception(create temp shell file failed)");
+		for (unsigned int i = 0; i < strlen(szcmd); i++)
+		ret.result.push_back (szerr[i]);
 		return 1;
 	}
 	fprintf (f1, "%s", cmd.c_str());
@@ -149,9 +305,7 @@ int	run_cmd(const string & cmd, ::cmtkp::CommandMessage& ret)
 		
 		char szexe[64] = {0};
 		sprintf (szexe, "%s", "/bin/bash");
-		char * const szparam[] = {szexe, 
-						szshell, 
-						NULL};
+		char * const szparam[] = {szexe, szshell, NULL};
 		int nFd =  open (szfile, O_CREAT|O_RDWR, 0644);	
 		dup2(nFd, 2);
 		dup2(nFd, 1);
@@ -165,32 +319,15 @@ int	run_cmd(const string & cmd, ::cmtkp::CommandMessage& ret)
 	}	
 	
 	unlink (szshell);
-	/*
-	FILE * fp = fopen (szfile, "r");
-	if (fp == NULL)
-	{
-		syslog_msg ("open file '%s' for reading failed\n",szfile); 
-		ret.result.push_back ("run command exception(create temp data file failed)");
-		return 1;
-	}
-	*/
 	char szline[4096] = {0};
 		
 	ret.filedata.clear();
-	/*
-	while ( fgets(szline, 1024, fp))  
-	{  
-		printf (szline);
-      		//ret.result.push_back(szline);
-		//res.push_back(szline);
-		memset (szline, 0, 1024);
-    	}  
-    	fclose(fp); 
-	*/
 	int nFd = open (szfile, O_RDONLY);
 	if (nFd == -1)
 	{
-		ret.result.push_back (string("open file '") + string(szfile)+ string("' for read failed"));
+		sprintf (szerr, "open file '%s' for reading failed\n", szfile);
+		for (unsigned int i = 0; i < strlen(szerr); i++)
+		ret.result.push_back (szerr[i]);
                 return -1;
 	}
 	
@@ -312,10 +449,12 @@ int	CMessageHandler::handle_file_message(const ::cmtkp::CommandMessage& msg,
 	char dstfile[512] = {0};
 	char dstfile_ok[530] = {0};
 	char dstinfo[520] = {0};
+	char szerr[256] = {0};
 	if (msg.head.file.size() == 0)
 	{
-		printf("invalid file name\n");
-		ret.result.push_back("invalid file name");
+		sprintf (szerr, "%s", "invalid file name to upload\n");
+		for (unsigned int i = 0; i < strlen (szerr); i++)
+		ret.result.push_back(szerr[i]);
 		ret.head.nret = -1;
 		return 1;
 	}	
@@ -339,8 +478,10 @@ int	CMessageHandler::handle_file_message(const ::cmtkp::CommandMessage& msg,
 	int nFd = open (file, O_WRONLY|O_CREAT|O_TRUNC);	
 	if (nFd == -1)
 	{
-		printf("create file '%s'' failed\n", file);
-		ret.result.push_back(string("create file '") + string(file)+string("' failed"));
+
+		sprintf(szerr, "create file '%s'' failed\n", file);
+		for (unsigned int i = 0; i < strlen(szerr); i++)
+		ret.result.push_back(szerr[i]);
 		ret.head.nret = -1;
 		return 1;
 
@@ -370,7 +511,9 @@ int	CMessageHandler::handle_file_message(const ::cmtkp::CommandMessage& msg,
 
 	if (total_size != msg.head.filesize)
 	{
-		ret.result.push_back("file size not equal");
+		sprintf (szerr, "%s", "file size not equal\n");
+		for (unsigned int i = 0; i < strlen(szerr); i++)
+		ret.result.push_back(szerr[i]);
 		ret.head.nret = -1;
 		return 1;
 
@@ -382,7 +525,9 @@ int	CMessageHandler::handle_file_message(const ::cmtkp::CommandMessage& msg,
 	//rename 	
 	if (rename (file, dstfile))
 	{
-		ret.result.push_back ("rename new file to old file failed");
+		sprintf (szerr,  "rename new file '%s' to old file '%s' failed\n", file, dstfile);
+		for (unsigned int i = 0; i < strlen(szerr); i++)
+		ret.result.push_back (szerr[i]);
 		ret.head.nret = -1;
 		return 1;
 	}	
@@ -392,7 +537,9 @@ int	CMessageHandler::handle_file_message(const ::cmtkp::CommandMessage& msg,
 	//if (chmod (dstfile, msg.head.stmode))
 	if (chmod (dstfile, 511))
 	{
-		ret.result.push_back ("chomd failed");
+		sprintf (szerr,  "chmod '%s' 511 failed\n", dstfile);
+		for (unsigned int i = 0; i < strlen(szerr); i++)
+		ret.result.push_back (szerr[i]);
 		printf ("change mode of file [%s] failed\n", dstfile);
 		ret.head.nret = -1;
 		return 1;
@@ -423,7 +570,9 @@ int	CMessageHandler::handle_file_message(const ::cmtkp::CommandMessage& msg,
 		nFd = open (dstinfo, O_WRONLY|O_CREAT|O_TRUNC);	
 		if (nFd == -1)
 		{
-			ret.result.push_back(string("create infor file '") + string(dstinfo)+ string("' failed"));
+			sprintf (szerr, "create infor file '%s' failed\n", dstinfo);
+			for (unsigned int i = 0; i < strlen (szerr); i++)
+			ret.result.push_back(szerr[i]);
 			ret.head.nret = -1;
 			return 1;
 		}
@@ -637,7 +786,8 @@ int	CMessageHandler::handle_fetch_message(const ::cmtkp::CommandMessage& msg,
 	if (stat (szfile, &file_stat))
 	{
 		sprintf (szmsg, "can not read file '%s'", szfile);
-		ret.result.push_back (szmsg);
+		for (unsigned int i = 0; i < strlen(szmsg); i++)
+		ret.result.push_back (szmsg[i]);
 		return -1;	
 
 	}
@@ -645,21 +795,24 @@ int	CMessageHandler::handle_fetch_message(const ::cmtkp::CommandMessage& msg,
 	if (file_stat.st_size > 10000000 )
 	{
 		sprintf (szmsg, "remote file too large '%ld(KB)'", file_stat.st_size/1024);
-		ret.result.push_back (szmsg);
+		for (unsigned int i = 0; i < strlen(szmsg); i++)
+		ret.result.push_back (szmsg[i]);
 		return -1;	
 	}	
 
 	if (access(szfile, R_OK))
 	{
 		sprintf (szmsg, "can not read file '%s'", szfile);
-		ret.result.push_back (szmsg);
+		for (unsigned int i = 0; i < strlen(szmsg); i++)
+		ret.result.push_back (szmsg[i]);
 		return -1;	
 	}
 	int nFd = open (szfile, O_RDONLY);
 	if (nFd == -1)
 	{
 		sprintf (szmsg, "open file '%s' for read failed", szfile);
-		ret.result.push_back (szmsg);
+		for (unsigned int i = 0; i < strlen(szmsg); i++)
+		ret.result.push_back (szmsg[i]);
                 return -1;
 	}
 	
@@ -682,10 +835,11 @@ int	CMessageHandler::handle_fetch_message(const ::cmtkp::CommandMessage& msg,
 	return 1;
 }
 //added by duanjigang@2011-11-20 1:08 --start
-int	run_limited_cmd(const string & cmd, ::cmtkp::StringArray & result)
+int	run_limited_cmd(const string & cmd, ::cmtkp::byteArray & result1)
 {
 	char szcmd[1024] = {0};
 	static int g_index = 0;
+	char result[512] = {0};
 	char* tail = 0;
 	int index = 0;
 	char szline [1024] = {0};
@@ -701,14 +855,17 @@ int	run_limited_cmd(const string & cmd, ::cmtkp::StringArray & result)
 	if (cmd.length() == 0)
 	{
 		printf ("EXIT:%s-%d\n", __FILE__,__LINE__);
-		result.push_back ("empty command to run");
+		sprintf(result, "%s", "empty command to run");
+		for (unsigned int i = 0; i < strlen(result); i++)
+		result1.push_back (result[i]);
 		return 0;
 	}	
 	if (cmd.size() > 1024)
 	{
 		printf ("EXIT:%s-%d\n", __FILE__,__LINE__);
-		sprintf (szcmd, "command too long(%u)", (unsigned int)cmd.size());
-		result.push_back (szcmd);
+		sprintf (result, "command too long(%u)", (unsigned int)cmd.size());
+		for (unsigned int i = 0; i < strlen(result); i++)
+		result1.push_back (result[i]);
 		return 0;
 	}
 	strncpy (szcmd, cmd.c_str(), cmd.size());
@@ -719,23 +876,28 @@ int	run_limited_cmd(const string & cmd, ::cmtkp::StringArray & result)
 		unlink (szfile);
 	}
 	int nret = run_limit_cmd (szcmd, szfile);
-	result.clear();
+	//result.clear();
 	if (nret <= 0)
 	{
-		result.push_back (string("can not find command:'") + szcmd + string("'"));
+		sprintf(result, "can not find command:'%s'", szcmd);
+		for (unsigned int i = 0; i < strlen(result); i++)
+		result1.push_back (result[i]);
 		return -1;
 	}
 	FILE * fp = fopen (szfile, "r");
 	if (!fp)
 	{
 		printf ("EXIT:%s-%d\n", __FILE__,__LINE__);
-		result.push_back ("open result file '"+string(szfile)+"' for reading failed");
+		sprintf(result, "open result file '%s' for reading failed\n", szfile);
+		for (unsigned int i = 0; i < strlen(result); i++)
+		result1.push_back (result[i]);
 		return -1;
 	}	
 	
 	while (fgets(szline, 1024, fp))
 	{
-		result.push_back (szline);
+		for (unsigned int i = 0; i < strlen(szline); i++)
+		result1.push_back (szline[i]);
 		memset (szline, 0, 1024);
 	}
 	fclose (fp);

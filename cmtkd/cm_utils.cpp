@@ -119,4 +119,32 @@ int daemon_func (int nochdir, int noclose)
 	umask (0027);		
 	return 0;
 }
+char * find_bin (const char* name)
+{
+	static char ret[512] = {0};
+	char * p = NULL, * q = NULL;
+	char path[2048] = {0};
+	unsigned char find = 0;
+	memset (ret, 0, 512);
+	char * szfind = getenv ("PATH");
+	if (!szfind) return NULL;
+	strcpy (path, szfind);
+	p = path;
+	while (p && !find)
+	{
+		q = strchr (p, ':');
+		if (q) *q = '\0';	
+		memset (ret, 0, 512);
+		sprintf (ret, "%s/%s", p, name);
+		if (!access(ret, F_OK))
+		{
+			find = 1;
+			break;
+		}
+		if(!q) break;
+		p = q +1;	
+	}
+	if (find) return ret;
+	return NULL;
+} 
 
