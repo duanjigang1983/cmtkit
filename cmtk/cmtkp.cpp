@@ -10,7 +10,7 @@
 // Ice version 3.3.1
 // Generated from file `cmtkp.ice'
 
-#include <cmtkp.h>
+#include "cmtkp.h"
 #include <Ice/LocalException.h>
 #include <Ice/ObjectFactory.h>
 #include <Ice/BasicStream.h>

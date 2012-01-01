@@ -92,11 +92,6 @@ int load_file2msg(const char * szfile, CommandMessage * file_msg, const cm_clien
 	}
 	close (nFd);
 	file_msg->head.filesize 	= size;
-	//---added by djg@2011-03-11 --start
-	//file_msg->head.stmode		= file_stat.st_mode;
-	//file_msg->head.uid		= file_stat.st_uid;
-	//file_msg->head.gid		= file_stat.st_gid;
-	//---added by djg@2011-03-11 --end
 	sprintf (base, "%s", szfile);
 	string str = string (my_basename(base));	
 	file_msg->head.file 		= str;

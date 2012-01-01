@@ -1,5 +1,5 @@
 @history:
-	2012-01-01:new version delivered
+	2012-01-01:new version delivered, cmtk is port to windows
 	2011-12-31:changing rum_cmd to run_unlimited_cmd so that any kind of command can be support by cmtk but not 			only shell, it is cool.........
 	2011-12-29:moding the bug in cmtkd (function makeargv--whic will adds some more chars to the last parameter
 		of cmtkd when was run as the limited mode, there are still bug that the cmtk can not get a response

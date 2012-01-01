@@ -9,6 +9,7 @@
 #include <io.h>
 #include <direct.h>
 #include <Winsock.h>
+#include <sys/stat.h>
 #include <Winbase.h>
 #include <WTYPES.H>
 #pragma comment(lib, "Ws2_32.lib")
