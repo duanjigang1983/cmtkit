@@ -328,12 +328,12 @@ int  run_limit_cmd (const char* szline, const char* szfile)
 	
 	while (pdir && loop)
 	{
-		printf ("loop:%s-%u-%u\n", pdir->path, dir_len, (unsigned)strlen(pdir->path));
+		//printf ("loop:%s-%u-%u\n", pdir->path, dir_len, (unsigned)strlen(pdir->path));
 		do
 		{
 			if (dir_len != strlen(pdir->path))break;
 			cm_plugin_t * pp = pdir->plist;
-			printf ("in package:%s\n", pdir->path);
+			//printf ("in package:%s\n", pdir->path);
 			while (pp && loop)
 			{
 				do

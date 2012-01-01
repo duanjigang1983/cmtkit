@@ -1,6 +1,6 @@
 %define orgniname cmtk
-%define version 1.0.4
-%define unmangled_version 1.0.4
+%define version 1.1.0
+%define unmangled_version 1.1.0
 %define	_prefix /usr
 %define release 1.el5
 

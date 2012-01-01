@@ -52,25 +52,21 @@ void show_result_obvious (dev_list_t * devlist, const cm_client_config_t * confi
 			for (unsigned int j = 0; j < p->stret.size(); j++)
 				printf("%c", p->stret[j]);
 			
-			int size = p->stret.size();
-			/*for (j = 0; j < size; j++)
-			{
-				printf ("%s", p->retmsg[j].c_str());
-			}*/
 
-			if (!size && (p->nret <= 0)) printf ("%s\n", error_msg(p->nret));
+			if (!p->stret.size() && (p->nret <= 0)) printf ("%s\n", error_msg(p->nret));
 		}else if (config->mode & MODE_UPLOAD_FILE)
 		{
 			if (p->nret > 0) printf ("success\n");
-			else printf ("failed[%d]\n", p->nret);
-
+			//else printf ("failed[%d]\n", p->nret);
+			else
 			for (unsigned int j = 0; j < p->stret.size(); j++)
 				printf("%c", p->stret[j]);
 
 		}else
 		{
 			if (p->nret > 0) printf ("success\n");
-			else printf ("failed[%d]\n", p->nret);
+			else
+			//else printf ("failed[%d]\n", p->nret);
 		for (unsigned int j = 0; j < p->stret.size(); j++)
 				printf("%c", p->stret[j]);
 

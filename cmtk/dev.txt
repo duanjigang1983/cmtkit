@@ -1,2 +1,2 @@
-djg.corp.linuxnote.net
-10.32.102.48
+localhost
+127.0.0.1

@@ -45,9 +45,11 @@ int send_cmd2host (cmdev_t* dev, const cm_client_config_t * config)
 		dev->stret.clear();
 		if (RUN_REAL == config->run_mode)	
 		{
-			for (unsigned int i = 0; i < ret_msg.filedata.size(); i++)
+			//for (unsigned int i = 0; i < ret_msg.filedata.size(); i++)
+			for (unsigned int i = 0; i < ret_msg.result.size(); i++)
 			{
-				dev->stret.push_back(ret_msg.filedata[i]);
+				//dev->stret.push_back(ret_msg.filedata[i]);
+				dev->stret.push_back(ret_msg.result[i]);
 			}
 		}
 	}
@@ -121,11 +123,11 @@ int send_file2host (cmdev_t* dev, const cm_client_config_t * config)
 		CommandMessage ret_msg = client->ProcessMessage(*(config->file_msg));
 		//added by cme@2011-12-29 --7:34 --start		
 		dev->stret.clear();
-		/*
-		for (unsigned int i = 0; i < ret_msg.filedata.size(); i++)
+		
+		for (unsigned int i = 0; i < ret_msg.result.size(); i++)
 		{
-			dev->stret.push_back(ret_msg.filedata[i]);
-		}*/
+			dev->stret.push_back(ret_msg.result[i]);
+		}
 		//added by cme@2011-12-29 --7:34 --finish		
 
 		nRet = ret_msg.head.nret;
@@ -208,11 +210,11 @@ int fetch_file_from_host (cmdev_t *dev, const cm_client_config_t * config)
 		
 		ret_msg = client->ProcessMessage(g_fetch_msg);
 		//added by cme@2011-12-29 --7:34 --start		
-		/*dev->stret.clear();
-		for (unsigned int i = 0; i < ret_msg.filedata.size(); i++)
+		dev->stret.clear();
+		for (unsigned int i = 0; i < ret_msg.result.size(); i++)
 		{
-			dev->stret.push_back(ret_msg.filedata[i]);
-		}*/
+			dev->stret.push_back(ret_msg.result[i]);
+		}
 		//added by cme@2011-12-29 --7:34 --finish		
 		nRet = ret_msg.head.nret;
 	}catch(const Ice::Exception & ex)

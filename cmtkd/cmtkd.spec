@@ -1,6 +1,6 @@
 %define orgniname cmtkitd
-%define version 1.1.2
-%define unmangled_version 1.1.2
+%define version 1.1.3
+%define unmangled_version 1.1.3
 %define	_prefix /usr
 %define release 1.el5
 
@@ -29,7 +29,7 @@ make
 cp cmtkd /usr/bin/
 mkdir -pv /etc/cmtk
 cp cmtkd_config.ini /etc/cmtk/
-cp -r plugin /etc/cmtk
+cp -r plugin /etc/cmtk/
 cp cmtkitd /etc/init.d/
 chkconfig --add cmtkitd 
 chmod a+x /etc/init.d/cmtkitd 
@@ -51,6 +51,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/cmtkd
 /etc/init.d/cmtkitd
 /etc/cmtk/cmtkd_config.ini
+/etc/cmtk/plugin/cmtk.ini
+/etc/cmtk/plugin/test
 %ifarch x86_64
 /usr/local/Ice-3.3.1/lib64/libIce.so.3.3.1
 /usr/local/Ice-3.3.1/lib64/libIceUtil.so.3.3.1

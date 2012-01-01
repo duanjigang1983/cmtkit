@@ -233,7 +233,8 @@ int run_unlimited_cmd (const string & cmd, ::cmtkp::CommandMessage& ret)
 	//getting result
 	char szline[4096] = {0};
 		
-	ret.filedata.clear();
+	//ret.filedata.clear();
+	ret.result.clear();
 	int nFd = open (szfile, O_RDONLY);
 	if (nFd == -1)
 	{
@@ -250,7 +251,8 @@ int run_unlimited_cmd (const string & cmd, ::cmtkp::CommandMessage& ret)
 		size += nread;
 		for (unsigned int i = 0; i < nread; i++)
 		{
-			ret.filedata.push_back (szline[i]);
+			//ret.filedata.push_back (szline[i]);
+			ret.result.push_back (szline[i]);
 		}
 		memset (szline, 0, nread);
 	}
@@ -785,7 +787,7 @@ int	CMessageHandler::handle_fetch_message(const ::cmtkp::CommandMessage& msg,
 
 	if (stat (szfile, &file_stat))
 	{
-		sprintf (szmsg, "can not read file '%s'", szfile);
+		sprintf (szmsg, "can not stat file '%s'\n", szfile);
 		for (unsigned int i = 0; i < strlen(szmsg); i++)
 		ret.result.push_back (szmsg[i]);
 		return -1;	
@@ -794,7 +796,7 @@ int	CMessageHandler::handle_fetch_message(const ::cmtkp::CommandMessage& msg,
 
 	if (file_stat.st_size > 10000000 )
 	{
-		sprintf (szmsg, "remote file too large '%ld(KB)'", file_stat.st_size/1024);
+		sprintf (szmsg, "remote file too large '%ld(KB)' > 10240(KB)\n", file_stat.st_size/1024);
 		for (unsigned int i = 0; i < strlen(szmsg); i++)
 		ret.result.push_back (szmsg[i]);
 		return -1;	
@@ -802,7 +804,7 @@ int	CMessageHandler::handle_fetch_message(const ::cmtkp::CommandMessage& msg,
 
 	if (access(szfile, R_OK))
 	{
-		sprintf (szmsg, "can not read file '%s'", szfile);
+		sprintf (szmsg, "can not read file '%s'\n", szfile);
 		for (unsigned int i = 0; i < strlen(szmsg); i++)
 		ret.result.push_back (szmsg[i]);
 		return -1;	
@@ -810,7 +812,7 @@ int	CMessageHandler::handle_fetch_message(const ::cmtkp::CommandMessage& msg,
 	int nFd = open (szfile, O_RDONLY);
 	if (nFd == -1)
 	{
-		sprintf (szmsg, "open file '%s' for read failed", szfile);
+		sprintf (szmsg, "open file '%s' for read failed\n", szfile);
 		for (unsigned int i = 0; i < strlen(szmsg); i++)
 		ret.result.push_back (szmsg[i]);
                 return -1;
@@ -829,9 +831,6 @@ int	CMessageHandler::handle_fetch_message(const ::cmtkp::CommandMessage& msg,
 	}
 	close (nFd);
 	ret.head.filesize	= size;
-	//ret.head.stmode		= file_stat.st_mode;
-	//ret.head.uid		= file_stat.st_uid;
-	//ret.head.gid		= file_stat.st_gid;
 	return 1;
 }
 //added by duanjigang@2011-11-20 1:08 --start
@@ -840,7 +839,7 @@ int	run_limited_cmd(const string & cmd, ::cmtkp::byteArray & result1)
 	char szcmd[1024] = {0};
 	static int g_index = 0;
 	char result[512] = {0};
-	char* tail = 0;
+	//char* tail = 0;
 	int index = 0;
 	char szline [1024] = {0};
 	pthread_mutex_lock (&g_index_mutex);
@@ -869,7 +868,15 @@ int	run_limited_cmd(const string & cmd, ::cmtkp::byteArray & result1)
 		return 0;
 	}
 	strncpy (szcmd, cmd.c_str(), cmd.size());
-	tail = szcmd + (cmd.size() - 2);
+	//tail = szcmd + (cmd.size() - 1);
+	
+	char * tt = szcmd + strlen(szcmd) - 1;
+	while (tt && isspace(*tt))
+	{
+		*tt = '\0';
+		tt--;
+	}
+
 	sprintf (szfile, "/tmp/cmtkit_%d.data", index);
 	if (access(szfile, W_OK))
 	{
@@ -879,7 +886,7 @@ int	run_limited_cmd(const string & cmd, ::cmtkp::byteArray & result1)
 	//result.clear();
 	if (nret <= 0)
 	{
-		sprintf(result, "can not find command:'%s'", szcmd);
+		sprintf(result, "can not find command:'%s'\n", szcmd);
 		for (unsigned int i = 0; i < strlen(result); i++)
 		result1.push_back (result[i]);
 		return -1;

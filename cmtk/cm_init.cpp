@@ -77,6 +77,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 			if (client_config->remote_port == 0)
 			{
 				printf ("error remote port value\n");
+				print_usage(argc, argv);
 				error = 1;
 			}
 			break;
@@ -102,6 +103,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 			if (client_config->remote_addr == 0)
 			{
 				printf ("error remote addr value\n");
+				print_usage(argc, argv);
 				error = 1;
 			}
 			break;
@@ -111,6 +113,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 			{
 				printf ("error time out value\n");
 				error = 1;
+				print_usage(argc, argv);
 			}
 			break;
 		case 'n':
@@ -119,6 +122,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 			{
 				printf ("error task number value\n");
 				error = 1;
+				print_usage(argc, argv);
 			}
 			break;
 		case 'f':
@@ -143,6 +147,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 			{
 				printf ("do not set duplicate task with '-c', already set\n");
 				error = 1;
+				print_usage(argc, argv);
 				break;
 			}
 			client_config->mode = MODE_CMD;
@@ -154,6 +159,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 			{
 				printf ("do not set duplicate task with '-u', already set\n");
 				error = 1;
+				print_usage(argc, argv);
 				break;
 			}
 			
@@ -169,11 +175,13 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 			ec = optopt;
 			error = 1;
 			printf ("invalid option '%c'\n", ec);
+			print_usage(argc, argv);
 			break;
 		case ':':
 			error  = 1;
 			printf ("option '%c' need a parameter\n", optopt);
 			break;
+			print_usage(argc, argv);
 			
 		case 'v':
 			show_version (argc, argv);
@@ -184,6 +192,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 			{
 				printf ("do not set duplicate task with '-r', already set\n");
 				error = 1;
+				print_usage(argc, argv);
 				break;
 			}
 			client_config->mode = MODE_DOWNLOAD_FILE;
@@ -195,6 +204,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 			break;
 		default:
 			printf ("unknow opt:%s\n", optarg);
+			print_usage(argc, argv);
 			error = 1;
 			break;
            }
@@ -205,6 +215,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 	{
 		printf ("invalid remote host or ip config file\n");
 		error = 1;
+			print_usage(argc, argv);
 		goto ret;
 	}else
 		if (strlen(client_config->conf) > 0)
@@ -218,6 +229,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 				{
 					printf ("invalid ip config file '%s'\n", client_config->conf);
 					error = 1;
+					print_usage(argc, argv);
 					goto ret;
 				}
 				
@@ -245,7 +257,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 			CIniHelper helper(CMTK_CONF);
 			if(helper.ErrorOccurence())
 			{
-				printf ("invalid remote port\n");
+				printf ("invalid remote port read from '%s'\n", szconf);
 				error = 1;
 				goto ret;
 			}
@@ -255,6 +267,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 			if (client_config->remote_port == 0)
 			{
 				printf ("invalid remote port\n");
+				print_usage(argc, argv);
 				error = 1;
 				goto ret;
 			}
@@ -264,6 +277,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 		if ((strlen(client_config->command) == 0)&&(MODE_CMD == client_config->mode))
 		{
 			printf ("invalid command to run\n");
+			print_usage(argc, argv);
 			error = 1;
 			goto ret;
 			
@@ -271,6 +285,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 		if ((client_config->remote_addr > 0) && (strlen(client_config->conf) > 0 ))
 		{
 			printf ("your will specify the remote host(s) with either '-h' or '-f', but not both of them\n");
+			print_usage(argc, argv);
 			error = 1;
 			goto ret;
 		}
@@ -281,6 +296,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 			(client_config->mode != MODE_DOWNLOAD_FILE))
 		{
 			printf ("please specify the command type with '-c command' or '-u update files' or '-r remote file'\n");
+			print_usage(argc, argv);
 			error = 1;
 			goto ret;
 		}
@@ -291,6 +307,22 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 			g_host_func = send_cmd2host;
 			break;
 		case MODE_UPLOAD_FILE://upload file
+		struct stat file_stat; 
+		if (stat (client_config->file, &file_stat))
+        	{   
+                	printf ("can not stat file '%s'\n", client_config->file);
+			error = 1;
+			goto ret;
+        	}   
+
+       		 if (file_stat.st_size > 10000000 )
+        	{   
+                	printf ("local file '%s' is too large '%ld(KB)' > 10240(KB)\n", 
+			client_config->file,
+			file_stat.st_size/1024);
+                	error = 1;
+			goto ret;
+        	}    	
 			
 			//check source file
 #ifdef _WIN32
@@ -308,6 +340,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 				{
 					printf ("please specify the dest file with '-d file_path' when trying to upload\n");
 					error = 1;
+					print_usage(argc, argv);
 					goto ret;
 				}
 				g_host_func = send_file2host;
@@ -318,6 +351,7 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 			if (!strlen(client_config->remote_file) || !strlen(client_config->local_file))
 			{
 				printf ("please specify local file and remote file when fetching a file\n");
+				print_usage(argc, argv);
 				error = 1;
 				goto ret;
 			}
@@ -325,8 +359,6 @@ int init_parameters(int argc, char* argv[], cm_client_config_t * client_config)
 		}
 ret:
 		
-		if (error)
-			print_usage(argc, argv);
 		//else
 		//	 printf("remote host:%u\n", client_config->remote_addr);
 		return 1 - error;
